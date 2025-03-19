@@ -195,7 +195,7 @@ def show_favorite_cars(message):
             f"🔢 Пробег: {car_mileage} | 🏎 Объём: {format_number(car_engine_volume)} cc\n\n"
             f"Стоимость авто под ключ:\n"
             f"${format_number(total_cost_usd)} | ₩{format_number(total_cost_krw)} | {format_number(total_cost_rub)} ₽\n\n"
-            f"📌 *Статус:* {car_status}\n\n"
+            # f"📌 *Статус:* {car_status}\n\n"
             f"[🔗 Ссылка на автомобиль]({car_link})\n\n"
             f"Консультация с менеджерами:\n\n"
             f"▪️ +82-10-6876-6801 (Александр)\n"
@@ -204,13 +204,13 @@ def show_favorite_cars(message):
 
         # Создаём клавиатуру
         keyboard = types.InlineKeyboardMarkup()
-        if car_status == "🔄 Не заказано":
-            keyboard.add(
-                types.InlineKeyboardButton(
-                    f"📦 Заказать {car_title}",
-                    callback_data=f"order_car_{car_id}",
-                )
-            )
+        # if car_status == "🔄 Не заказано":
+        #     keyboard.add(
+        #         types.InlineKeyboardButton(
+        #             f"📦 Заказать {car_title}",
+        #             callback_data=f"order_car_{car_id}",
+        #         )
+        #     )
         keyboard.add(
             types.InlineKeyboardButton(
                 "❌ Удалить авто из списка", callback_data=f"delete_car_{car_id}"
@@ -1281,42 +1281,42 @@ def calculate_cost(link, message):
         parse_mode="Markdown",
     )
 
-    # Если пользователь в списке FREE_ACCESS_USERS, он получает бесконечные расчёты
-    if user_id in FREE_ACCESS_USERS:
-        user_subscription = True
-    else:
-        # Проверяем подписку в БД
-        user_subscription = check_user_subscription(user_id)
+    # # Если пользователь в списке FREE_ACCESS_USERS, он получает бесконечные расчёты
+    # if user_id in FREE_ACCESS_USERS:
+    #     user_subscription = True
+    # else:
+    #     # Проверяем подписку в БД
+    #     user_subscription = check_user_subscription(user_id)
 
-        # Если в БД нет подписки – проверяем через API
-        if not user_subscription:
-            user_subscription = is_user_subscribed(user_id)
-            if user_subscription:
-                update_user_subscription(user_id, True)  # ✅ Обновляем подписку в БД
+    #     # Если в БД нет подписки – проверяем через API
+    #     if not user_subscription:
+    #         user_subscription = is_user_subscribed(user_id)
+    #         if user_subscription:
+    #             update_user_subscription(user_id, True)  # ✅ Обновляем подписку в БД
 
     # Проверяем количество расчётов
-    user_calc_count = get_calculation_count(user_id)
+    # user_calc_count = get_calculation_count(user_id)
 
-    if user_calc_count >= 2 and not user_subscription:
-        keyboard = types.InlineKeyboardMarkup()
-        keyboard.add(
-            types.InlineKeyboardButton(
-                "🚀 Оформить подписку", url=f"https://t.me/{CHANNEL_USERNAME}"
-            )
-        )
-        keyboard.add(
-            types.InlineKeyboardButton("✅ Готово", callback_data="check_subscription")
-        )
+    # if user_calc_count >= 2 and not user_subscription:
+    #     keyboard = types.InlineKeyboardMarkup()
+    #     keyboard.add(
+    #         types.InlineKeyboardButton(
+    #             "🚀 Оформить подписку", url=f"https://t.me/{CHANNEL_USERNAME}"
+    #         )
+    #     )
+    #     keyboard.add(
+    #         types.InlineKeyboardButton("✅ Готово", callback_data="check_subscription")
+    #     )
 
-        bot.send_message(
-            message.chat.id,
-            "🚫 У вас закончились бесплатные расчёты. Чтобы продолжить, оформите подписку.",
-            reply_markup=keyboard,
-        )
-        return
+    #     bot.send_message(
+    #         message.chat.id,
+    #         "🚫 У вас закончились бесплатные расчёты. Чтобы продолжить, оформите подписку.",
+    #         reply_markup=keyboard,
+    #     )
+    #     return
 
-    # Увеличиваем счётчик расчётов
-    increment_calculation_count(user_id)
+    # # Увеличиваем счётчик расчётов
+    # increment_calculation_count(user_id)
 
     print_message("ЗАПРОС НА РАСЧЁТ АВТОМОБИЛЯ")
 
@@ -2185,18 +2185,27 @@ def process_car_age(message):
         "От 5 до 7 лет": "5-7",
         "Более 7 лет": "7-0",
     }
-
-    if user_input not in age_mapping:
+    
+    if user_input == 'Главное меню':
+        bot.send_message(message.chat.id, 'Главное меню', reply_markup=main_menu())
+        return
+    
+    elif user_input not in age_mapping:
         bot.send_message(message.chat.id, "Пожалуйста, выберите возраст из списка.")
         return
-
+    
+    
     # Сохраняем возраст авто
     user_data[message.chat.id] = {"car_age": age_mapping[user_input]}
+
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add(types.KeyboardButton('Главное меню'))
 
     # Запрашиваем объем двигателя
     bot.send_message(
         message.chat.id,
         "Введите объем двигателя в см³ (например, 1998):",
+        reply_markup=markup
     )
     bot.register_next_step_handler(message, process_engine_volume)
 
@@ -2205,7 +2214,10 @@ def process_engine_volume(message):
     user_input = message.text.strip()
 
     # Проверяем, что введено число
-    if not user_input.isdigit():
+    if user_input == 'Главное меню':
+        bot.send_message(message.chat.id, 'Главное меню', reply_markup=main_menu())
+        return
+    elif not user_input.isdigit():
         bot.send_message(
             message.chat.id, "Пожалуйста, введите корректный объем двигателя в см³."
         )
@@ -2215,10 +2227,14 @@ def process_engine_volume(message):
     # Сохраняем объем двигателя
     user_data[message.chat.id]["engine_volume"] = int(user_input)
 
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add(types.KeyboardButton('Главное меню'))
+
     # Запрашиваем стоимость авто
     bot.send_message(
         message.chat.id,
         "Введите стоимость автомобиля в корейских вонах (например, 15000000):",
+        reply_markup=markup
     )
     bot.register_next_step_handler(message, process_car_price)
 
@@ -2229,7 +2245,10 @@ def process_car_price(message):
     user_input = message.text.strip()
 
     # Проверяем, что введено число
-    if not user_input.isdigit():
+    if user_input == 'Главное меню':
+        bot.send_message(message.chat.id, 'Главное меню', reply_markup=main_menu())
+        return
+    elif not user_input.isdigit():
         bot.send_message(
             message.chat.id,
             "Пожалуйста, введите корректную стоимость автомобиля в вонах.",
@@ -2404,6 +2423,7 @@ def handle_message(message):
         )
         keyboard.add("До 3 лет", "От 3 до 5 лет")
         keyboard.add("От 5 до 7 лет", "Более 7 лет")
+        keyboard.add('Главное меню')
 
         bot.send_message(
             message.chat.id,
