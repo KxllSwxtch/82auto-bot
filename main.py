@@ -39,8 +39,8 @@ from utils import (
     get_customs_fees_manual,
 )
 
-CALCULATE_CAR_TEXT = "Рассчитать Автомобиль (Encar, KBChaCha, ChutCha)"
-CHANNEL_USERNAME = "akmotors96"
+CALCULATE_CAR_TEXT = "Рассчитать Автомобиль (Encar, KBChaCha, KCar)"
+CHANNEL_USERNAME = "autofromkorea82"
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 load_dotenv()
@@ -82,20 +82,20 @@ user_contacts = {}
 user_names = {}
 
 MANAGERS = [728438182, 642176871, 8039170978]
-FREE_ACCESS_USERS = {
-    1759578050,
-    7914145866,
-    627689711,  # Андрей Дей
-    8039170978,  # Артур
-    642176871,  # Тимур
-    728438182,  # Дима,
-    1276031616,
-    738485560,
-    6581762873,
-    1333492483,
-    708642607,
-    74973321,
-}
+# FREE_ACCESS_USERS = {
+#     1759578050,
+#     7914145866,
+#     627689711,  # Андрей Дей
+#     8039170978,  # Артур
+#     642176871,  # Тимур
+#     728438182,  # Дима,
+#     1276031616,
+#     738485560,
+#     6581762873,
+#     1333492483,
+#     708642607,
+#     74973321,
+# }
 
 ORDER_STATUSES = {
     "1": "🚗 Авто выкуплен (на базе)",
@@ -198,8 +198,8 @@ def show_favorite_cars(message):
             f"📌 *Статус:* {car_status}\n\n"
             f"[🔗 Ссылка на автомобиль]({car_link})\n\n"
             f"Консультация с менеджерами:\n\n"
-            f"+82-10-2934-8855 (Артур)\n"
-            f"@timyo97 (Тимур)\n\n"
+            f"▪️ +82-10-6876-6801 (Александр)\n"
+            f"▪️ +82-10-2766-4334 (Тимофей)\n"
         )
 
         # Создаём клавиатуру
@@ -759,27 +759,6 @@ def place_order(call):
 
     bot.answer_callback_query(call.id, "✅ Заказ отправлен менеджерам!")
 
-
-# def archive_completed_orders():
-#     global user_orders
-#     completed_orders = []
-
-#     # Проверяем все заказы всех пользователей
-#     for user_id, orders in user_orders.items():
-#         for order in orders:
-#             if (
-#                 order["status"] == "🚛 Доставляется клиенту"
-#             ):  # ✅ Проверяем как элемент списка
-#                 completed_orders.append(order)
-
-#         # Убираем завершённые заказы из активных
-#         user_orders[user_id] = [
-#             order for order in orders if order["status"] != "🚛 Доставляется клиенту"
-#         ]
-
-#     print(f"📦 Архивировано {len(completed_orders)} заказов")  # Логирование
-
-
 ################## КОД ДЛЯ СТАТУСОВ
 
 
@@ -825,7 +804,7 @@ def set_bot_commands():
         types.BotCommand("start", "Запустить бота"),
         types.BotCommand("exchange_rates", "Курсы валют"),
         types.BotCommand("my_cars", "Мои избранные автомобили"),
-        types.BotCommand("orders", "Список заказов (Для менеджеров)"),
+        # types.BotCommand("orders", "Список заказов (Для менеджеров)"),
     ]
 
     # Проверяем, является ли пользователь менеджером
@@ -963,22 +942,18 @@ def cbr_command(message):
         print(f"Ошибка при получении курсов валют: {e}")
 
 
-# Main menu creation function
 def main_menu():
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
     keyboard.add(
         types.KeyboardButton(CALCULATE_CAR_TEXT),
         types.KeyboardButton("Ручной расчёт"),
-        types.KeyboardButton("Заказ запчастей"),
+        types.KeyboardButton("Часто задаваемые вопросы"),
     )
     keyboard.add(
         types.KeyboardButton("Написать менеджеру"),
         types.KeyboardButton("О нас"),
         types.KeyboardButton("Telegram-канал"),
-        # types.KeyboardButton("Написать в WhatsApp"),
         types.KeyboardButton("Instagram"),
-        # types.KeyboardButton("Tik-Tok"),
-        # types.KeyboardButton("Facebook"),
     )
     return keyboard
 
@@ -991,12 +966,12 @@ def send_welcome(message):
     user_first_name = message.from_user.first_name
     welcome_message = (
         f"Здравствуйте, {user_first_name}!\n\n"
-        "Я бот компании AK Motors. Я помогу вам рассчитать стоимость понравившегося вам автомобиля из Южной Кореи до стран СНГ.\n\n"
+        "Я бот компании 82 Auto. Я помогу вам рассчитать стоимость понравившегося вам автомобиля из Южной Кореи до стран СНГ.\n\n"
         "Выберите действие из меню ниже."
     )
 
     # Логотип компании
-    logo_url = "https://res.cloudinary.com/pomegranitedesign/image/upload/v1740623897/AK%20Motors/akmotorslogo.jpg"
+    logo_url = "https://res.cloudinary.com/pomegranitedesign/image/upload/v1742368668/82%20Auto/photo_2025-03-19_16-15-33.jpg"
 
     # Отправляем логотип перед сообщением
     bot.send_photo(
@@ -1373,17 +1348,17 @@ def calculate_cost(link, message):
             send_error_message(message, "🚫 Не удалось извлечь carSeq из ссылки.")
             return
 
-    elif "web.chutcha.net" in link or "chutcha" in link:
+    elif "kcar.com" in link:
         parsed_url = urlparse(link)
-        path_parts = parsed_url.path.split("/")
-
-        if len(path_parts) >= 4 and path_parts[-2] == "detail":
-            car_id = path_parts[-1]  # Берём последний элемент из пути
+        query_params = parse_qs(parsed_url.query)
+        
+        if "i_sCarCd" in query_params:
+            car_id = query_params["i_sCarCd"][0]
             car_id_external = car_id
-            link = f"https://web.chutcha.net/bmc/detail/{car_id}"
+            link = f"https://www.kcar.com/bc/detail/carInfoDtl?i_sCarCd={car_id}"
         else:
             send_error_message(
-                message, "🚫 Не удалось извлечь ID автомобиля из ссылки Chutcha.net."
+                message, "🚫 Не удалось извлечь ID автомобиля из ссылки KCar."
             )
             return
 
@@ -1480,7 +1455,7 @@ def calculate_cost(link, message):
     if not car_price and car_engine_displacement and formatted_car_date:
         keyboard = types.InlineKeyboardMarkup()
         keyboard.add(
-            types.InlineKeyboardButton("Написать менеджеру", url="https://t.me/timyo97")
+            types.InlineKeyboardButton("Написать менеджеру", url="https://t.me/Aleksandr_82auto")
         )
         keyboard.add(
             types.InlineKeyboardButton(
@@ -1757,10 +1732,9 @@ def calculate_cost(link, message):
             f"💵 <b>Курс USDT к Воне: ₩{format_number(usdt_to_krw_rate)}</b>\n\n"
             f"🔗 <a href='{preview_link}'>Ссылка на автомобиль</a>\n\n"
             "Если данное авто попадает под санкции, пожалуйста уточните возможность отправки в вашу страну у наших менеджеров:\n\n"
-            f"▪️ +82-10-2934-8855 (Артур)\n"
-            f"▪️ +82-10-5528-0997 (Тимур)\n"
-            # f"▪️ +82 10-5128-8082 (Александр) \n\n"
-            "🔗 <a href='https://t.me/akmotors96'>Официальный телеграм канал</a>\n"
+            f"▪️ +82-10-6876-6801 (Александр)\n"
+            f"▪️ +82-10-2766-4334 (Тимофей)\n"
+            "🔗 <a href='https://t.me/autofromkorea82'>Официальный телеграм канал</a>\n"
         )
 
         # Клавиатура с дальнейшими действиями
@@ -1790,7 +1764,7 @@ def calculate_cost(link, message):
                 )
             )
         keyboard.add(
-            types.InlineKeyboardButton("Написать менеджеру", url="https://t.me/timyo97")
+            types.InlineKeyboardButton("Написать менеджеру", url="https://t.me/Aleksandr_82auto")
         )
         keyboard.add(
             types.InlineKeyboardButton(
@@ -2040,8 +2014,8 @@ def handle_callback_query(call):
             f"Автовоз до Москвы:\n<b>${format_number(car_data['moscow_transporter_usd'])}</b> | <b>₩{format_number(car_data['moscow_transporter_krw'])}</b> | <b>{format_number(car_data['moscow_transporter_rub'])} ₽</b>\n\n"
             f"Итого под ключ: \n<b>${format_number(car_data['total_cost_usd'])}</b> | <b>₩{format_number(car_data['total_cost_krw'])}</b> | <b>{format_number(car_data['total_cost_rub'])} ₽</b>\n\n"
             f"<b>Доставку до вашего города уточняйте у менеджеров:</b>\n"
-            f"▪️ +82-10-2934-8855 (Артур)\n"
-            f"▪️ +82-10-5528-0997 (Тимур)\n"
+            f"▪️ +82-10-6876-6801 (Александр)\n"
+            f"▪️ +82-10-2766-4334 (Тимофей)\n"
             # f"▪️ +82 10-5128-8082 (Александр)\n\n"
         )
 
@@ -2094,12 +2068,6 @@ def handle_callback_query(call):
         keyboard.add(
             types.InlineKeyboardButton("Главное меню", callback_data="main_menu")
         )
-        # keyboard.add(
-        #     types.InlineKeyboardButton(
-        #         "Связаться с менеджером", url="https://t.me/timyo97"
-        #     )
-        # )
-
         bot.send_message(
             call.message.chat.id,
             technical_card_output,
@@ -2140,7 +2108,7 @@ def handle_callback_query(call):
             )
             keyboard.add(
                 types.InlineKeyboardButton(
-                    "Связаться с менеджером", url="https://t.me/timyo97"
+                    "Связаться с менеджером", url="https://t.me/Aleksandr_82auto"
                 )
             )
 
@@ -2176,7 +2144,7 @@ def handle_callback_query(call):
             )
             keyboard.add(
                 types.InlineKeyboardButton(
-                    "Связаться с менеджером", url="https://t.me/timyo97"
+                    "Связаться с менеджером", url="https://t.me/Aleksandr_82auto"
                 )
             )
             keyboard.add(
@@ -2390,9 +2358,8 @@ def process_car_price(message):
         f"Автовоз до Москвы:\n<b>${format_number(moscow_transporter_usd)}</b> | <b>₩{format_number(moscow_transporter_krw)}</b> | <b>{format_number(moscow_transporter_rub)} ₽</b>\n\n"
         f"Итого под ключ: \n<b>${format_number(total_cost_usd)}</b> | <b>₩{format_number(total_cost_krw)}</b> | <b>{format_number(total_cost_rub)} ₽</b>\n\n"
         f"<b>Доставку до вашего города уточняйте у менеджеров:</b>\n"
-        f"▪️ +82-10-2934-8855 (Артур)\n"
-        f"▪️ +82-10-5528-0997 (Тимур)\n"
-        # f"▪️ +82 10-5128-8082 (Александр)\n\n"
+        f"▪️ +82-10-6876-6801 (Александр)\n"
+        f"▪️ +82-10-2766-4334 (Тимофей)\n"
     )
 
     # Клавиатура с дальнейшими действиями
@@ -2403,7 +2370,7 @@ def process_car_price(message):
         )
     )
     keyboard.add(
-        types.InlineKeyboardButton("Связаться с менеджером", url="https://t.me/timyo97")
+        types.InlineKeyboardButton("Связаться с менеджером", url="https://t.me/Aleksandr_82auto")
     )
     keyboard.add(types.InlineKeyboardButton("Главное меню", callback_data="main_menu"))
 
@@ -2445,26 +2412,20 @@ def handle_message(message):
         )
         bot.register_next_step_handler(message, process_car_age)
 
-    elif user_message == "Заказ запчастей":
+    elif user_message == "Часто задаваемые вопросы":
         bot.send_message(
             message.chat.id,
-            "Для оформления заявки на заказ запчастей пожалуйста напишите нашему менеджеру\n@KHAN_ALEX2022",
+            "В разработке...",
         )
-
-    # Проверка на корректность ссылки
     elif re.match(
-        r"^https?://(www|fem)\.encar\.com/.*|^https?://(www\.)?kbchachacha\.com/.*|^https?://m\.kbchachacha\.com/.*|^https?://(web\.)?chutcha\.net/.*",
+        r"^https?://(www|fem)\.encar\.com/.*|^https?://(www\.)?kbchachacha\.com/.*|^https?://m\.kbchachacha\.com/.*|^https?://(www\.)?kcar\.com/.*",
         user_message,
     ):
         calculate_cost(user_message, message)
-
-    # Проверка на другие команды
     elif user_message == "Написать менеджеру":
         managers_list = [
-            {"name": "Ким Артур (Корея)", "whatsapp": "https://wa.me/821029348855"},
-            {"name": "Ким Артур (Россия)", "whatsapp": "https://wa.me/79999000070"},
-            {"name": "Тимур", "whatsapp": "https://wa.me/821055280997"},
-            # {"name": "Александр", "whatsapp": "https://wa.me/821051288082"},
+            {"name": "Александр", "whatsapp": "https://wa.me/821068766801"},
+            {"name": "Тимофей ", "whatsapp": "https://wa.me/821027664334"},
         ]
 
         # Формируем сообщение со списком менеджеров
@@ -2474,48 +2435,19 @@ def handle_message(message):
 
         # Отправляем сообщение с использованием Markdown
         bot.send_message(message.chat.id, message_text, parse_mode="Markdown")
-
-    elif user_message == "Написать в WhatsApp":
-        contacts = [
-            {"name": "Константин", "phone": "+82 10-7650-3034"},
-            {"name": "Владимир", "phone": "+82 10-7930-2218"},
-            {"name": "Илья", "phone": "+82 10-3458-2205"},
-        ]
-
-        message_text = "\n".join(
-            [
-                f"[{contact['name']}](https://wa.me/{contact['phone'].replace('+', '')})"
-                for contact in contacts
-            ]
-        )
-        bot.send_message(message.chat.id, message_text, parse_mode="Markdown")
-
     elif user_message == "О нас":
-        about_message = "AK Motors\nЮжнокорейская экспортная компания.\nСпециализируемся на поставках автомобилей из Южной Кореи в страны СНГ.\nОпыт работы более 5 лет.\n\nПочему выбирают нас?\n• Надежность и скорость доставки.\n• Индивидуальный подход к каждому клиенту.\n• Полное сопровождение сделки.\n\n💬 Ваш путь к надежным автомобилям начинается здесь!"
+        about_message = "82 Auto\nЮжнокорейская экспортная компания.\nСпециализируемся на поставках автомобилей из Южной Кореи в страны СНГ.\nОпыт работы более 5 лет.\n\nПочему выбирают нас?\n• Надежность и скорость доставки.\n• Индивидуальный подход к каждому клиенту.\n• Полное сопровождение сделки.\n\n💬 Ваш путь к надежным автомобилям начинается здесь!"
         bot.send_message(message.chat.id, about_message)
-
     elif user_message == "Telegram-канал":
-        channel_link = "https://t.me/akmotors96"
+        channel_link = "https://t.me/autofromkorea82"
         bot.send_message(
             message.chat.id, f"Подписывайтесь на наш Telegram-канал: {channel_link}"
         )
     elif user_message == "Instagram":
-        instagram_link = "https://www.instagram.com/ak_motors_export"
+        instagram_link = "https://www.instagram.com/82.auto"
         bot.send_message(
             message.chat.id,
             f"Посетите наш Instagram: {instagram_link}",
-        )
-    elif user_message == "Tik-Tok":
-        tiktok_link = "https://www.tiktok.com/@kpp_motors"
-        bot.send_message(
-            message.chat.id,
-            f"Следите за свежим контентом на нашем TikTok: {tiktok_link}",
-        )
-    elif user_message == "Facebook":
-        facebook_link = "https://www.facebook.com/share/1D8bg2xL1i/?mibextid=wwXIfr"
-        bot.send_message(
-            message.chat.id,
-            f"KPP Motors на Facebook: {facebook_link}",
         )
     else:
         bot.send_message(
