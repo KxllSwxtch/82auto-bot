@@ -759,6 +759,7 @@ def place_order(call):
 
     bot.answer_callback_query(call.id, "✅ Заказ отправлен менеджерам!")
 
+
 ################## КОД ДЛЯ СТАТУСОВ
 
 
@@ -1147,119 +1148,70 @@ def get_car_info(url):
             print(
                 "❌ Не удалось найти JSON-данные в <script type='application/ld+json'>"
             )
-    elif "chutcha" in url:
-        print("🔍 Парсим Chutcha.net...")
+    elif "kcar" in url:
+        print("🔍 Парсим KCar.com...")
 
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "Accept": "application/json, text/plain, */*",
             "Accept-Language": "en,ru;q=0.9,en-CA;q=0.8,la;q=0.7,fr;q=0.6,ko;q=0.5",
-            "Referer": "https://web.chutcha.net/bmc/search?brandGroup=1&modelTree=%7B%7D&priceRange=0%2C0&mileage=0%2C0&year=&saleType=&accident=&fuel=&transmission=&region=&color=&option=&cpo=&theme=&sort=1&currPage=&carType=",
+            "Referer": "https://www.kcar.com/",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
         }
 
         response = requests.get(url, headers=headers)
+        json_response = response.json()
 
-        soup = BeautifulSoup(response.text, "lxml")
+        data = json_response.get("data", {})
 
-        # Extract JSON data from <script type="application/ld+json">
-        script_tag = soup.find("script", {"type": "application/json"})
-        vehicle_data = None
+        car_name = data.get("rvo", {}).get("carWhlNm", "")
+        car_price = data.get("rvo", {}).get("npriceFullType", "")
+        car_mileage = data.get("rvo", {}).get("milg", "")
+        car_engine_displacement = data.get("rvo", {}).get("engdispmnt", "")
+        transmission = data.get("rvo", {}).get("trnsmsncdNm", "")
+        car_number = data.get("rvo", {}).get("cno", "")
 
-        if not script_tag:
-            return "Error: JSON data not found"
+        car_images = data.get("photoList", [])
 
-        try:
-            data = json.loads(script_tag.string)
-        except json.JSONDecodeError:
-            return "Error: Failed to parse JSON"
-
-        # Перемещение к ldJson (содержит основную информацию о машине)
-        vehicle_data = (
-            data.get("props", {})
-            .get("pageProps", {})
-            .get("dehydratedState", {})
-            .get("queries", [])[0]
-            .get("state", {})
-            .get("data", {})
+        # Фильтруем фото, у которых есть "sortOrdr", и сортируем по этому значению
+        sorted_images = sorted(
+            [photo for photo in car_images if photo.get("sortOrdr")],
+            key=lambda x: int(x["sortOrdr"]),
         )
 
-        # Получение изображений
-        img_list_data = vehicle_data.get("img_list", [])
-        img_list = []
-        for query in img_list_data:
-            img_list.append(
-                f"https://imgsc.chutcha.kr{query.get('img_path','').replace('.jpg', '_ori.jpg')}?s=1024x768&t=crop"
-            )
+        # Берём первые 10 и достаём ссылки
+        car_image_urls = [photo["elanPath"] for photo in sorted_images[:10]]
 
-        name = (
-            vehicle_data.get("base_info", {}).get("brand_name", "")
-            + " "
-            + vehicle_data.get("base_info", {}).get("model_name", "")
-            + " "
-            + vehicle_data.get("base_info", {}).get("sub_model_name", "")
-            + " "
-            + vehicle_data.get("base_info", {}).get("grade_name", "")
-        )
-        car_price = vehicle_data.get("base_info", {}).get("plain_price", "")
-        car_number = vehicle_data.get("base_info", {}).get("number_plate", "")
-        car_year = vehicle_data.get("base_info", {}).get("first_reg_year", "")[2:]
-        car_month = str(
-            vehicle_data.get("base_info", {}).get("first_reg_month", "")
-        ).zfill(2)
-        car_mileage = vehicle_data.get("base_info", {}).get("plain_mileage", "")
-        car_fuel = vehicle_data.get("base_info", {}).get("fuel_name", "")
-        car_engine_displacement = vehicle_data.get("base_info", {}).get(
-            "displacement", ""
-        )
-        car_transmission = vehicle_data.get("base_info", {}).get(
-            "transmission_name", ""
-        )
+        car_year = data.get("rvo", {}).get(
+            "fstCarRegYm", ""
+        )  # Приходит в таком формате 202211
 
-        # Список всех страховых
-        car_history = (
-            vehicle_data.get("safe_info", {})
-            .get("carhistory_safe", {})
-            .get("insurance", {})
-            .get("list", [])
-        )
+        year = car_year[0:4]
+        month = car_year[4:]
 
-        # Инициализация сумм страховых выплат
-        own_damage_total = 0  # Выплаты по текущему авто
-        other_damage_total = 0  # Выплаты по другим авто
+        car_fuel = data.get("rvo", {}).get("fuelTypecdNm", "")
 
-        # Обработка выплат, если они есть
-        if car_history or len(car_history.get("price", "")) > 0:
-            for claim in car_history:
-                claim_type = claim.get("type")
-                claim_price = (
-                    int(claim["price"])
-                    if claim.get("price") and claim["price"].isdigit()
-                    else 0
-                )
+        car_insurance_history = data.get("carHistoryAccList", [])
+        own_damage_total = 0
+        other_damage_total = 0
 
-                if claim_type == "1":  # Выплаты по текущему авто
-                    own_damage_total += claim_price
-                elif claim_type == "2":  # Выплаты по другим авто
-                    other_damage_total += claim_price
+        if len(car_insurance_history) > 0:
+            for record in car_insurance_history:
+                own_damage_total += record.get("reprEstmCost2", 0)
+                other_damage_total += record.get("reprEstmCost1", 0)
 
-        # Формирование итогового JSON
         car_info = {
-            "name": name,
+            "name": car_name,
             "car_price": car_price,
-            "images": img_list,
+            "images": car_image_urls,
             "number": car_number,
-            "year": car_year,
-            "month": car_month,
+            "year": year,
+            "month": month,
             "mileage": car_mileage,
             "fuel": car_fuel,
             "engine_volume": car_engine_displacement,
-            "transmission": car_transmission,
-            "insurance_claims": {
-                "own_damage_total": own_damage_total if car_history else "Недоступно",
-                "other_damage_total": (
-                    other_damage_total if car_history else "Недоступно"
-                ),
-            },
+            "transmission": transmission,
+            "own_damage_total": own_damage_total,
+            "other_damage_total": other_damage_total,
         }
 
         return car_info
@@ -1273,50 +1225,11 @@ def calculate_cost(link, message):
     get_rub_to_krw_rate()
     get_usdt_to_krw_rate()
 
-    user_id = message.chat.id
-
     bot.send_message(
         message.chat.id,
         "✅ Подгружаю актуальный курс валют и делаю расчёты. ⏳ Пожалуйста подождите...",
         parse_mode="Markdown",
     )
-
-    # # Если пользователь в списке FREE_ACCESS_USERS, он получает бесконечные расчёты
-    # if user_id in FREE_ACCESS_USERS:
-    #     user_subscription = True
-    # else:
-    #     # Проверяем подписку в БД
-    #     user_subscription = check_user_subscription(user_id)
-
-    #     # Если в БД нет подписки – проверяем через API
-    #     if not user_subscription:
-    #         user_subscription = is_user_subscribed(user_id)
-    #         if user_subscription:
-    #             update_user_subscription(user_id, True)  # ✅ Обновляем подписку в БД
-
-    # Проверяем количество расчётов
-    # user_calc_count = get_calculation_count(user_id)
-
-    # if user_calc_count >= 2 and not user_subscription:
-    #     keyboard = types.InlineKeyboardMarkup()
-    #     keyboard.add(
-    #         types.InlineKeyboardButton(
-    #             "🚀 Оформить подписку", url=f"https://t.me/{CHANNEL_USERNAME}"
-    #         )
-    #     )
-    #     keyboard.add(
-    #         types.InlineKeyboardButton("✅ Готово", callback_data="check_subscription")
-    #     )
-
-    #     bot.send_message(
-    #         message.chat.id,
-    #         "🚫 У вас закончились бесплатные расчёты. Чтобы продолжить, оформите подписку.",
-    #         reply_markup=keyboard,
-    #     )
-    #     return
-
-    # # Увеличиваем счётчик расчётов
-    # increment_calculation_count(user_id)
 
     print_message("ЗАПРОС НА РАСЧЁТ АВТОМОБИЛЯ")
 
@@ -1351,11 +1264,11 @@ def calculate_cost(link, message):
     elif "kcar.com" in link:
         parsed_url = urlparse(link)
         query_params = parse_qs(parsed_url.query)
-        
+
         if "i_sCarCd" in query_params:
             car_id = query_params["i_sCarCd"][0]
             car_id_external = car_id
-            link = f"https://www.kcar.com/bc/detail/carInfoDtl?i_sCarCd={car_id}"
+            link = f"https://api.kcar.com/bc/car-info-detail-of-ng?i_sCarCd={car_id}&i_sPassYn=N&bltbdKnd=CM050"
         else:
             send_error_message(
                 message, "🚫 Не удалось извлечь ID автомобиля из ссылки KCar."
@@ -1415,19 +1328,21 @@ def calculate_cost(link, message):
             f"https://www.kbchachacha.com/public/car/detail.kbc?carSeq={car_id}"
         )
 
-    if "web.chutcha.net" in link:
+    if "kcar" in link:
         result = get_car_info(link)
 
         car_title = result["name"]
 
-        month = result["year"]
-        year = result["month"]
+        month = result["month"]
+        year = result["year"]
 
-        # Очищаем объём двигателя от "cc"
+        car_month = month
+        car_year = year[2:]
+
         car_engine_displacement = re.sub(r"\D+", "", result["engine_volume"])
+        car_price = int(result["car_price"]) / 10000
 
-        # Преобразуем цену из формата "3,450만원 / 월 62만원"
-        car_price = result["car_price"]
+        car_photos = result["images"]
 
         # Форматируем дату
         formatted_car_date = (
@@ -1444,18 +1359,17 @@ def calculate_cost(link, message):
             "Автомат" if "오토" in result["transmission"] else "Механика"
         )
 
-        # Получаем фотографии автомобиля
-        car_photos = result["images"]
+        preview_link = f"https://www.kcar.com/bc/detail/carInfoDtl?i_sCarCd={car_id}"
 
-        preview_link = f"https://web.chutcha.net/bmc/detail/{car_id}"
-
-        own_car_insurance_payments = result["insurance_claims"]["own_damage_total"]
-        other_car_insurance_payments = result["insurance_claims"]["other_damage_total"]
+        own_car_insurance_payments = result["own_damage_total"]
+        other_car_insurance_payments = result["other_damage_total"]
 
     if not car_price and car_engine_displacement and formatted_car_date:
         keyboard = types.InlineKeyboardMarkup()
         keyboard.add(
-            types.InlineKeyboardButton("Написать менеджеру", url="https://t.me/Aleksandr_82auto")
+            types.InlineKeyboardButton(
+                "Написать менеджеру", url="https://t.me/Aleksandr_82auto"
+            )
         )
         keyboard.add(
             types.InlineKeyboardButton(
@@ -1764,7 +1678,9 @@ def calculate_cost(link, message):
                 )
             )
         keyboard.add(
-            types.InlineKeyboardButton("Написать менеджеру", url="https://t.me/Aleksandr_82auto")
+            types.InlineKeyboardButton(
+                "Написать менеджеру", url="https://t.me/Aleksandr_82auto"
+            )
         )
         keyboard.add(
             types.InlineKeyboardButton(
@@ -2185,27 +2101,26 @@ def process_car_age(message):
         "От 5 до 7 лет": "5-7",
         "Более 7 лет": "7-0",
     }
-    
-    if user_input == 'Главное меню':
-        bot.send_message(message.chat.id, 'Главное меню', reply_markup=main_menu())
+
+    if user_input == "Главное меню":
+        bot.send_message(message.chat.id, "Главное меню", reply_markup=main_menu())
         return
-    
+
     elif user_input not in age_mapping:
         bot.send_message(message.chat.id, "Пожалуйста, выберите возраст из списка.")
         return
-    
-    
+
     # Сохраняем возраст авто
     user_data[message.chat.id] = {"car_age": age_mapping[user_input]}
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add(types.KeyboardButton('Главное меню'))
+    markup.add(types.KeyboardButton("Главное меню"))
 
     # Запрашиваем объем двигателя
     bot.send_message(
         message.chat.id,
         "Введите объем двигателя в см³ (например, 1998):",
-        reply_markup=markup
+        reply_markup=markup,
     )
     bot.register_next_step_handler(message, process_engine_volume)
 
@@ -2214,8 +2129,8 @@ def process_engine_volume(message):
     user_input = message.text.strip()
 
     # Проверяем, что введено число
-    if user_input == 'Главное меню':
-        bot.send_message(message.chat.id, 'Главное меню', reply_markup=main_menu())
+    if user_input == "Главное меню":
+        bot.send_message(message.chat.id, "Главное меню", reply_markup=main_menu())
         return
     elif not user_input.isdigit():
         bot.send_message(
@@ -2228,13 +2143,13 @@ def process_engine_volume(message):
     user_data[message.chat.id]["engine_volume"] = int(user_input)
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add(types.KeyboardButton('Главное меню'))
+    markup.add(types.KeyboardButton("Главное меню"))
 
     # Запрашиваем стоимость авто
     bot.send_message(
         message.chat.id,
         "Введите стоимость автомобиля в корейских вонах (например, 15000000):",
-        reply_markup=markup
+        reply_markup=markup,
     )
     bot.register_next_step_handler(message, process_car_price)
 
@@ -2245,8 +2160,8 @@ def process_car_price(message):
     user_input = message.text.strip()
 
     # Проверяем, что введено число
-    if user_input == 'Главное меню':
-        bot.send_message(message.chat.id, 'Главное меню', reply_markup=main_menu())
+    if user_input == "Главное меню":
+        bot.send_message(message.chat.id, "Главное меню", reply_markup=main_menu())
         return
     elif not user_input.isdigit():
         bot.send_message(
@@ -2389,7 +2304,9 @@ def process_car_price(message):
         )
     )
     keyboard.add(
-        types.InlineKeyboardButton("Связаться с менеджером", url="https://t.me/Aleksandr_82auto")
+        types.InlineKeyboardButton(
+            "Связаться с менеджером", url="https://t.me/Aleksandr_82auto"
+        )
     )
     keyboard.add(types.InlineKeyboardButton("Главное меню", callback_data="main_menu"))
 
@@ -2423,7 +2340,7 @@ def handle_message(message):
         )
         keyboard.add("До 3 лет", "От 3 до 5 лет")
         keyboard.add("От 5 до 7 лет", "Более 7 лет")
-        keyboard.add('Главное меню')
+        keyboard.add("Главное меню")
 
         bot.send_message(
             message.chat.id,
