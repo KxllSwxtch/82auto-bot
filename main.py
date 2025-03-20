@@ -830,7 +830,7 @@ def get_usdt_to_krw_rate():
 
     # Извлечение курса KRW
     krw_rate = data["data"]["rates"]["KRW"]
-    usdt_to_krw_rate = float(krw_rate) - 15
+    usdt_to_krw_rate = float(krw_rate) - 25
 
     print(f"Курс USDT к KRW -> {str(usdt_to_krw_rate)}")
 
