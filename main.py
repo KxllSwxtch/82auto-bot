@@ -2345,7 +2345,7 @@ def handle_message(message):
     if user_message == CALCULATE_CAR_TEXT:
         bot.send_message(
             message.chat.id,
-            "Пожалуйста, введите ссылку на автомобиль с одного из сайтов (encar.com, kbchachacha.com, chutcha.net):",
+            "Пожалуйста, введите ссылку на автомобиль с одного из сайтов (encar.com, kbchachacha.com, kcar.com):",
         )
 
     elif user_message == "Ручной расчёт":
