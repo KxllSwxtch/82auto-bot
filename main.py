@@ -1422,201 +1422,139 @@ def calculate_cost(link, message):
 
         # Расчет итоговой стоимости автомобиля в рублях
         total_cost = (
-            price_rub
-            + ((1400000 / usd_to_krw_rate) * usd_to_rub_rate)
-            + ((1400000 / usd_to_krw_rate) * usd_to_rub_rate)
-            + ((440000 / usd_to_krw_rate) * usd_to_rub_rate)
-            + 120000
-            + customs_fee
-            + customs_duty
-            + recycling_fee
-            + 13000
-            + 230000
+            price_rub  # Цена авто в рублях
+            + ((2000000 / usd_to_krw_rate) * usd_to_rub_rate)  # Расходы по Корее
+            + customs_fee  # Таможенный сбор
+            + customs_duty  # Таможенная пошлина
+            + recycling_fee  # Утильсбор
+            + 30000  # Брокер РФ
+            + 15000  # Временная регистрация
+            + 45000  # СВХ
+            + 25000  # Лаборатория
+            + 2000  # Коносамент
+            + 2000  # Экспертиза
+            + 8000  # Перегон из СВХ
+            + 20000  # За санкционную добавляется «услуга консультанта - 20.000
         )
 
         total_cost_krw = (
-            price_krw
-            + 1400000
-            + 1400000
-            + 440000
-            + (120000 / usd_to_rub_rate) * usd_to_krw_rate
-            + (customs_fee / usd_to_rub_rate) * usd_to_krw_rate
-            + (customs_duty / usd_to_rub_rate) * usd_to_krw_rate
-            + (recycling_fee / usd_to_rub_rate) * usd_to_krw_rate
-            + (13000 / usd_to_rub_rate) * usd_to_krw_rate
-            + (230000 / usd_to_rub_rate) * usd_to_krw_rate
+            price_krw  # Цена авто в вонах
+            + 2000000  # Расходы по Корее
+            + ((customs_fee / usd_to_rub_rate) * usd_to_krw_rate)  # Таможенный сбор
+            + ((customs_duty / usd_to_rub_rate) * usd_to_krw_rate)  # Таможенная пошлина
+            + ((recycling_fee / usd_to_rub_rate) * usd_to_krw_rate)  # Утильсбор
+            + ((30000 / usd_to_rub_rate) * usd_to_krw_rate)  # Брокер РФ
+            + ((15000 / usd_to_rub_rate) * usd_to_krw_rate)  # Временная регистрация
+            + ((45000 / usd_to_rub_rate) * usd_to_krw_rate)  # СВХ
+            + ((25000 / usd_to_rub_rate) * usd_to_krw_rate)  # Лаборатория
+            + ((2000 / usd_to_rub_rate) * usd_to_krw_rate)  # Коносамент
+            + ((2000 / usd_to_rub_rate) * usd_to_krw_rate)  # Экспертиза
+            + ((8000 / usd_to_rub_rate) * usd_to_krw_rate)  # Перегон из СВХ
+            + (
+                (20000 / usd_to_rub_rate) * usd_to_krw_rate
+            )  # За санкционную добавляется «услуга консультанта - 20
         )
 
         total_cost_usd = (
-            price_usd
-            + (1400000 / usd_to_krw_rate)
-            + (1400000 / usd_to_krw_rate)
-            + (440000 / usd_to_krw_rate)
-            + (120000 / usd_to_rub_rate)
-            + (customs_fee / usd_to_rub_rate)
-            + (customs_duty / usd_to_rub_rate)
-            + (recycling_fee / usd_to_rub_rate)
-            + (13000 / usd_to_rub_rate)
-            + (230000 / usd_to_rub_rate)
+            price_usd  # Цена авто в долларах
+            + ((2000000 / usd_to_krw_rate))  # Расходы по Корее
+            + (customs_fee / usd_to_rub_rate)  # Таможенный сбор
+            + (customs_duty / usd_to_rub_rate)  # Таможенная пошлина
+            + (recycling_fee / usd_to_rub_rate)  # Утильсбор
+            + (30000 / usd_to_rub_rate)  # Брокер РФ
+            + (15000 / usd_to_rub_rate)  # Временная регистрация
+            + (45000 / usd_to_rub_rate)  # СВХ
+            + (25000 / usd_to_rub_rate)  # Лаборатория
+            + (2000 / usd_to_rub_rate)  # Коносамент
+            + (2000 / usd_to_rub_rate)  # Экспертиза
+            + (8000 / usd_to_rub_rate)  # Перегон из СВХ
+            + (20000 / usd_to_rub_rate)
+            # За санкционную добавляется «услуга консультанта - 20
         )
 
         car_data["total_cost_usd"] = total_cost_usd
         car_data["total_cost_krw"] = total_cost_krw
         car_data["total_cost_rub"] = total_cost
 
-        car_data["company_fees_usd"] = 1400000 / usd_to_krw_rate
-        car_data["company_fees_krw"] = 1400000
-        car_data["company_fees_rub"] = (1400000 / usd_to_krw_rate) * usd_to_rub_rate
-
-        car_data["agent_korea_rub"] = 50000
-        car_data["agent_korea_usd"] = 50000 / usd_to_rub_rate
-        car_data["agent_korea_krw"] = (50000 / usd_to_rub_rate) * usd_to_krw_rate
-
-        car_data["advance_rub"] = (1000000 / usd_to_krw_rate) * usd_to_rub_rate
-        car_data["advance_usd"] = 1000000 * usd_to_krw_rate
-        car_data["advance_krw"] = 1000000
-
+        # Стоимость автомобиля
         car_data["car_price_krw"] = price_krw
         car_data["car_price_usd"] = price_usd
         car_data["car_price_rub"] = price_rub
 
-        car_data["dealer_korea_usd"] = 440000 / usd_to_krw_rate
-        car_data["dealer_korea_krw"] = 440000
-        car_data["dealer_korea_rub"] = (440000 / usd_to_krw_rate) * usd_to_rub_rate
+        # Стояночные
+        car_data["parking_korea_krw"] = 440000
+        car_data["parking_korea_usd"] = 440000 / usd_to_krw_rate
+        car_data["parking_korea_rub"] = (440000 / usd_to_krw_rate) * usd_to_rub_rate
 
-        car_data["delivery_korea_usd"] = 100000 / usd_to_krw_rate
-        car_data["delivery_korea_krw"] = 100000
-        car_data["delivery_korea_rub"] = (100000 / usd_to_krw_rate) * usd_to_rub_rate
+        # Осмотр
+        car_data["car_review_krw"] = 300000
+        car_data["car_review_usd"] = 300000 / usd_to_krw_rate
+        car_data["car_review_rub"] = (300000 / usd_to_krw_rate) * usd_to_rub_rate
 
-        car_data["transfer_korea_usd"] = 350000 / usd_to_krw_rate
-        car_data["transfer_korea_krw"] = 350000
-        car_data["transfer_korea_rub"] = (350000 / usd_to_krw_rate) * usd_to_rub_rate
+        # Документы
+        car_data["korea_documents_krw"] = 150000
+        car_data["korea_documents_usd"] = 150000 / usd_to_krw_rate
+        car_data["korea_documents_rub"] = (150000 / usd_to_krw_rate) * usd_to_rub_rate
 
-        car_data["freight_korea_usd"] = 1400000 / usd_to_krw_rate
-        car_data["freight_korea_krw"] = 1400000
-        car_data["freight_korea_rub"] = (1400000 / usd_to_krw_rate) * usd_to_rub_rate
+        # Перевозка
+        car_data["transfer_korea_krw"] = 230000
+        car_data["transfer_korea_usd"] = 230000 / usd_to_krw_rate
+        car_data["transfer_korea_rub"] = (230000 / usd_to_krw_rate) * usd_to_rub_rate
 
-        car_data["korea_total_usd"] = (
-            (50000 / usd_to_rub_rate)
-            + (440000 / usd_to_krw_rate)
-            + (100000 / usd_to_krw_rate)
-            + (350000 / usd_to_krw_rate)
-            + (600)
-        )
+        # Фрахт
+        car_data["freight_korea_krw"] = 880000
+        car_data["freight_korea_usd"] = 880000 / usd_to_krw_rate
+        car_data["freight_korea_rub"] = (880000 / usd_to_krw_rate) * usd_to_rub_rate
 
-        car_data["korea_total_krw"] = (
-            ((50000 / usd_to_rub_rate) * usd_to_krw_rate)
-            + (440000)
-            + (100000)
-            + 350000
-            + (600 * usd_to_krw_rate)
-        )
-
-        car_data["korea_total_rub"] = (
-            (50000)
-            + ((440000 / usd_to_krw_rate) * usd_to_rub_rate)
-            + ((100000 / usd_to_krw_rate) * usd_to_rub_rate)
-            + ((350000 / usd_to_krw_rate) * usd_to_rub_rate)
-            + (600 * usd_to_rub_rate)
-        )
-
-        car_data["korea_total_plus_car_usd"] = (
-            (50000 / usd_to_rub_rate)
-            + (price_usd)
-            + (440000 / usd_to_krw_rate)
-            + (100000 / usd_to_krw_rate)
-            + (350000 / usd_to_krw_rate)
-            + (600)
-        )
-        car_data["korea_total_plus_car_krw"] = (
-            ((50000 / usd_to_rub_rate) * usd_to_krw_rate)
-            + (price_krw)
-            + (440000)
-            + (100000)
-            + 350000
-            + (600 * usd_to_krw_rate)
-        )
-        car_data["korea_total_plus_car_rub"] = (
-            (50000)
-            + (price_rub)
-            + ((440000 / usd_to_krw_rate) * usd_to_rub_rate)
-            + ((100000 / usd_to_krw_rate) * usd_to_rub_rate)
-            + ((350000 / usd_to_krw_rate) * usd_to_rub_rate)
-            + (600 * usd_to_rub_rate)
-        )
-
-        # Расходы Россия
+        # Расходы по РФ
+        car_data["customs_duty_rub"] = customs_duty
         car_data["customs_duty_usd"] = customs_duty / usd_to_rub_rate
         car_data["customs_duty_krw"] = (
             customs_duty / usd_to_rub_rate
         ) * usd_to_krw_rate
-        car_data["customs_duty_rub"] = customs_duty
 
+        car_data["customs_fee_rub"] = customs_fee
         car_data["customs_fee_usd"] = customs_fee / usd_to_rub_rate
         car_data["customs_fee_krw"] = (customs_fee / usd_to_rub_rate) * usd_to_krw_rate
-        car_data["customs_fee_rub"] = customs_fee
 
+        car_data["util_fee_rub"] = recycling_fee
         car_data["util_fee_usd"] = recycling_fee / usd_to_rub_rate
         car_data["util_fee_krw"] = (recycling_fee / usd_to_rub_rate) * usd_to_krw_rate
-        car_data["util_fee_rub"] = recycling_fee
 
-        car_data["broker_russia_usd"] = 120000 / usd_to_rub_rate
-        car_data["broker_russia_krw"] = (120000 / usd_to_rub_rate) * usd_to_krw_rate
-        car_data["broker_russia_rub"] = 120000
+        car_data["perm_registration_rub"] = 15000
+        car_data["perm_registration_usd"] = 15000 / usd_to_rub_rate
+        car_data["perm_registration_krw"] = (15000 / usd_to_rub_rate) * usd_to_krw_rate
 
-        car_data["moscow_transporter_usd"] = 230000 / usd_to_rub_rate
-        car_data["moscow_transporter_krw"] = (
-            230000 / usd_to_rub_rate
-        ) * usd_to_krw_rate
-        car_data["moscow_transporter_rub"] = 230000
+        car_data["broker_rub"] = 30000
+        car_data["broker_usd"] = 30000 / usd_to_rub_rate
+        car_data["broker_krw"] = (30000 / usd_to_rub_rate) * usd_to_krw_rate
 
-        car_data["vladivostok_transfer_usd"] = 13000 / usd_to_rub_rate
-        car_data["vladivostok_transfer_krw"] = (
-            13000 / usd_to_rub_rate
-        ) * usdt_to_krw_rate
-        car_data["vladivostok_transfer_rub"] = 13000
+        car_data["svh_rub"] = 45000
+        car_data["svh_usd"] = 45000 / usd_to_rub_rate
+        car_data["svh_krw"] = (45000 / usd_to_rub_rate) * usd_to_krw_rate
 
-        car_data["svh_russia_usd"] = 50000 / usd_to_rub_rate
-        car_data["svh_russia_krw"] = (50000 / usd_to_rub_rate) * usd_to_krw_rate
-        car_data["svh_russia_rub"] = 50000
+        car_data["lab_rub"] = 25000
+        car_data["lab_usd"] = 25000 / usd_to_rub_rate
+        car_data["lab_krw"] = (25000 / usd_to_rub_rate) * usd_to_krw_rate
 
-        car_data["lab_russia_usd"] = 30000 / usd_to_rub_rate
-        car_data["lab_russia_krw"] = (30000 / usd_to_rub_rate) * usd_to_krw_rate
-        car_data["lab_russia_rub"] = 30000
+        car_data["konosament_rub"] = 2000
+        car_data["konosament_usd"] = 2000 / usd_to_rub_rate
+        car_data["konosament_krw"] = (2000 / usd_to_rub_rate) * usd_to_krw_rate
 
-        car_data["perm_registration_russia_usd"] = 8000 / usd_to_rub_rate
-        car_data["perm_registration_russia_krw"] = (
-            8000 / usd_to_rub_rate
-        ) * usd_to_krw_rate
-        car_data["perm_registration_russia_rub"] = 8000
+        car_data["expertise_rub"] = 2000
+        car_data["expertise_usd"] = 2000 / usd_to_rub_rate
+        car_data["expertise_krw"] = (2000 / usd_to_rub_rate) * usd_to_krw_rate
 
-        car_data["russia_total_usd"] = (
-            (customs_duty / usd_to_rub_rate)
-            + (customs_fee / usd_to_rub_rate)
-            + (recycling_fee / usd_to_rub_rate)
-            + (346)
-            + (50000 / usd_to_rub_rate)
-            + (8000 / usd_to_rub_rate)
-        )
-        car_data["russia_total_krw"] = (
-            ((customs_duty / usd_to_rub_rate) * usd_to_krw_rate)
-            + ((customs_fee / usd_to_rub_rate) * usd_to_krw_rate)
-            + ((recycling_fee / usd_to_rub_rate) * usd_to_krw_rate)
-            + (346 * usd_to_krw_rate)
-            + ((50000 / usd_to_rub_rate) * usd_to_krw_rate)
-            + ((8000 / usd_to_rub_rate) * usd_to_krw_rate)
-        )
-        car_data["russia_total_rub"] = (
-            customs_duty
-            + customs_fee
-            + recycling_fee
-            + (346 * usd_to_rub_rate)
-            + 50000
-            + 8000
-        )
+        car_data["svh_transfer_rub"] = 8000
+        car_data["svh_transfer_usd"] = 8000 / usd_to_rub_rate
+        car_data["svh_transfer_krw"] = (8000 / usd_to_rub_rate) * usd_to_krw_rate
+
+        car_data["consultant_fee_rub"] = 20000
+        car_data["consultant_fee_usd"] = 20000 / usd_to_rub_rate
+        car_data["consultant_fee_krw"] = (20000 / usd_to_rub_rate) * usd_to_krw_rate
 
         car_insurance_payments_chutcha = ""
-        if "web.chutcha.net" in link:
+        if "kcar" in link:
             own_insurance_text = (
                 f"₩{format_number(own_car_insurance_payments)}"
                 if isinstance(own_car_insurance_payments, int)
@@ -1916,18 +1854,23 @@ def handle_callback_query(call):
         print_message("[ЗАПРОС] ДЕТАЛИЗАЦИЯ РАСЧËТА")
 
         detail_message = (
-            f"<i>ПЕРВАЯ ЧАСТЬ ОПЛАТЫ (КОРЕЯ)</i>:\n\n"
-            f"Стоимость автомобиля:\n<b>${format_number(car_data['car_price_usd'])}</b> | <b>₩{format_number(car_data['car_price_krw'])}</b> | <b>{format_number(car_data['car_price_rub'])} ₽</b>\n\n"
-            f"Услуги фирмы (поиск и подбор авто, документация, 3 осмотра):\n<b>${format_number(car_data['company_fees_usd'])}</b> | <b>₩{format_number(car_data['company_fees_krw'])}</b> | <b>{format_number(car_data['company_fees_rub'])} ₽</b>\n\n"
-            f"Фрахт (отправка в порт, доставка автомобиля на базу, оплата судна):\n<b>${format_number(car_data['freight_korea_usd'])}</b> | <b>₩{format_number(car_data['freight_korea_krw'])}</b> | <b>{format_number(car_data['freight_korea_rub'])} ₽</b>\n\n\n"
-            f"Диллерский сбор:\n<b>${format_number(car_data['dealer_korea_usd'])}</b> | <b>₩{format_number(car_data['dealer_korea_krw'])}</b> | <b>{format_number(car_data['dealer_korea_rub'])} ₽</b>\n\n"
-            f"<i>ВТОРАЯ ЧАСТЬ ОПЛАТЫ (РОССИЯ)</i>:\n\n"
-            f"Брокер-Владивосток:\n<b>${format_number(car_data['broker_russia_usd'])}</b> | <b>₩{format_number(car_data['broker_russia_krw'])}</b> | <b>{format_number(car_data['broker_russia_rub'])} ₽</b>\n\n\n"
+            f"Стоимость автомобиля:\n<b>${format_number(car_data['car_price_usd'])}</b> | <b>₩{format_number(car_data['car_price_krw'])}</b> | <b>{format_number(car_data['car_price_usd'])} ₽</b>\n\n"
+            f"Стояночные:\n<b>${format_number(car_data['parking_korea_usd'])}</b> | <b>₩{format_number(car_data['parking_korea_krw'])}</b> | <b>{format_number(car_data['parking_korea_rub'])} ₽</b>\n\n"
+            f"Осмотр:\n<b>${format_number(car_data['car_review_usd'])}</b> | <b>₩{format_number(car_data['car_review_krw'])}</b> | <b>{format_number(car_data['car_review_rub'])} ₽</b>\n\n"
+            f"Документы:\n<b>${format_number(car_data['korea_documents_usd'])}</b> | <b>₩{format_number(car_data['korea_documents_krw'])}</b> | <b>{format_number(car_data['korea_documents_rub'])} ₽</b>\n\n"
+            f"Перевозка:\n<b>${format_number(car_data['transfer_korea_usd'])}</b> | <b>₩{format_number(car_data['transfer_korea_krw'])}</b> | <b>{format_number(car_data['transfer_korea_rub'])} ₽</b>\n\n"
+            f"Фрахт:\n<b>${format_number(car_data['freight_korea_usd'])}</b> | <b>₩{format_number(car_data['freight_korea_krw'])}</b> | <b>{format_number(car_data['freight_korea_rub'])} ₽</b>\n\n\n"
             f"Единая таможенная ставка:\n<b>${format_number(car_data['customs_duty_usd'])}</b> | <b>₩{format_number(car_data['customs_duty_krw'])}</b> | <b>{format_number(car_data['customs_duty_rub'])} ₽</b>\n\n"
             f"Таможенное оформление:\n<b>${format_number(car_data['customs_fee_usd'])}</b> | <b>₩{format_number(car_data['customs_fee_krw'])}</b> | <b>{format_number(car_data['customs_fee_rub'])} ₽</b>\n\n"
             f"Утилизационный сбор:\n<b>${format_number(car_data['util_fee_usd'])}</b> | <b>₩{format_number(car_data['util_fee_krw'])}</b> | <b>{format_number(car_data['util_fee_rub'])} ₽</b>\n\n\n"
-            f"Перегон во Владивостоке:\n<b>${format_number(car_data['vladivostok_transfer_usd'])}</b> | <b>₩{format_number(car_data['vladivostok_transfer_krw'])}</b> | <b>{format_number(car_data['vladivostok_transfer_rub'])} ₽</b>\n\n"
-            f"Автовоз до Москвы:\n<b>${format_number(car_data['moscow_transporter_usd'])}</b> | <b>₩{format_number(car_data['moscow_transporter_krw'])}</b> | <b>{format_number(car_data['moscow_transporter_rub'])} ₽</b>\n\n"
+            f"Брокер:\n<b>${format_number(car_data['broker_usd'])}</b> | <b>₩{format_number(car_data['broker_krw'])}</b> | <b>{format_number(car_data['broker_rub'])} ₽</b>\n\n"
+            f"Временная регистрация:\n<b>${format_number(car_data['perm_registration_usd'])}</b> | <b>₩{format_number(car_data['perm_registration_krw'])}</b> | <b>{format_number(car_data['perm_registration_rub'])} ₽</b>\n\n"
+            f"СВХ (Склад временного хранения):\n<b>${format_number(car_data['svh_usd'])}</b> | <b>₩{format_number(car_data['svh_krw'])}</b> | <b>{format_number(car_data['svh_rub'])} ₽</b>\n\n"
+            f"Лаборатория:\n<b>${format_number(car_data['lab_usd'])}</b> | <b>₩{format_number(car_data['lab_krw'])}</b> | <b>{format_number(car_data['lab_rub'])} ₽</b>\n\n"
+            f"Коносамент:\n<b>${format_number(car_data['konosament_usd'])}</b> | <b>₩{format_number(car_data['konosament_krw'])}</b> | <b>{format_number(car_data['konosament_rub'])} ₽</b>\n\n"
+            f"Экспертиза:\n<b>${format_number(car_data['expertise_usd'])}</b> | <b>₩{format_number(car_data['expertise_krw'])}</b> | <b>{format_number(car_data['expertise_rub'])} ₽</b>\n\n"
+            f"Перегон из СВХ/Лаборатория/Стоянка:\n<b>${format_number(car_data['svh_transfer_usd'])}</b> | <b>₩{format_number(car_data['svh_transfer_krw'])}</b> | <b>{format_number(car_data['svh_transfer_krw'])} ₽</b>\n\n"
+            f"Услуги консультанта:\n<b>${format_number(car_data['consultant_fee_usd'])}</b> | <b>₩{format_number(car_data['consultant_fee_krw'])}</b> | <b>{format_number(car_data['consultant_fee_rub'])} ₽</b>\n\n"
             f"Итого под ключ: \n<b>${format_number(car_data['total_cost_usd'])}</b> | <b>₩{format_number(car_data['total_cost_krw'])}</b> | <b>{format_number(car_data['total_cost_rub'])} ₽</b>\n\n"
             f"<b>Доставку до вашего города уточняйте у менеджеров:</b>\n"
             f"▪️ +82-10-6876-6801 (Александр)\n"
