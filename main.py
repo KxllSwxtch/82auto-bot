@@ -878,7 +878,7 @@ def get_currency_rates():
 def get_usd_to_krw_rate():
     global usd_to_krw_rate
 
-    url = "https://api.manana.kr/exchange/rate/KRW/USD.json"
+    url = "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json"
 
     try:
         response = requests.get(url)
@@ -886,7 +886,7 @@ def get_usd_to_krw_rate():
         data = response.json()
 
         # Получаем курс и добавляем +25 KRW
-        usd_to_krw = data[0]["rate"] + 10
+        usd_to_krw = data.get("usd", {}).get("krw", 0) - 10
         usd_to_krw_rate = usd_to_krw
 
         print(f"Курс USD → KRW (с учетом +25 KRW): {usd_to_krw_rate}")
