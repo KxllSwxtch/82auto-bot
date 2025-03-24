@@ -848,11 +848,7 @@ def get_rub_to_krw_rate():
         krw_nominal = krw_info["Nominal"]  # 1000
         krw_value = krw_info["Value"] + 2.5
         krw_rate = float(krw_value) / float(krw_nominal)
-
         rub_to_krw_rate = krw_rate
-
-        return rub_to_krw_rate
-
     except requests.RequestException as e:
         print(f"Ошибка при получении курса RUB → KRW: {e}")
         return None
@@ -1404,8 +1400,8 @@ def calculate_cost(link, message):
 
         # Конвертируем стоимость авто в рубли
         price_krw = int(car_price) * 10000
-        price_usd = price_krw / usd_to_krw_rate
-        price_rub = price_usd * usd_to_rub_rate
+        price_rub = price_krw * rub_to_krw_rate
+        # price_usd = price_krw / usd_to_krw_rate
 
         response = get_customs_fees(
             car_engine_displacement,
@@ -1434,9 +1430,9 @@ def calculate_cost(link, message):
             + 2000  # Коносамент
             + 2000  # Экспертиза
             + 8000  # Перегон из СВХ
-            + 20000
-            if car_engine_displacement > 2000
-            else 0  # За санкционную добавляется «услуга консультанта - 20.000
+            + (
+                20000 if car_engine_displacement > 2000 else 0
+            )  # За санкционную добавляется «услуга консультанта - 20.000
         )
 
         total_cost_krw = (
@@ -1452,9 +1448,9 @@ def calculate_cost(link, message):
             + 2000 / rub_to_krw_rate  # Коносамент
             + 2000 / rub_to_krw_rate  # Экспертиза
             + 8000 / rub_to_krw_rate  # Перегон из СВХ
-            + 20000 / rub_to_krw_rate
-            if car_engine_displacement > 2000
-            else 0  # За санкционную добавляется «услуга консультанта"
+            + (
+                20000 / rub_to_krw_rate if car_engine_displacement > 2000 else 0
+            )  # За санкционную добавляется «услуга консультанта"
         )
 
         # total_cost_usd = (
