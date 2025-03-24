@@ -75,14 +75,12 @@ def get_customs_fees_manual(engine_volume, car_price, car_age, engine_type=1):
     }
 
     try:
-        response = requests.post(url, data=payload, headers=headers, proxies=proxies)
+        response = requests.post(url, data=payload, headers=headers)
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
         print(f"Ошибка при запросе к calcus.ru: {e}")
         return None
-    finally:
-        time.sleep(3)
 
 
 def get_customs_fees(engine_volume, car_price, car_year, car_month, engine_type=1):
@@ -121,8 +119,6 @@ def get_customs_fees(engine_volume, car_price, car_year, car_month, engine_type=
     except requests.RequestException as e:
         print(f"Ошибка при запросе к calcus.ru: {e}")
         return None
-    finally:
-        time.sleep(3)
 
 
 def clean_number(value):
