@@ -886,10 +886,10 @@ def get_usd_to_krw_rate():
         data = response.json()
 
         # Получаем курс и добавляем +25 KRW
-        usd_to_krw = data.get("usd", {}).get("krw", 0) - 10
+        usd_to_krw = data.get("usd", {}).get("krw", 0) - 15
         usd_to_krw_rate = usd_to_krw
 
-        print(f"Курс USD → KRW (с учетом +25 KRW): {usd_to_krw_rate}")
+        print(f"Курс USD → KRW: {usd_to_krw_rate}")
     except requests.RequestException as e:
         print(f"Ошибка при получении курса USD → KRW: {e}")
         usd_to_krw_rate = None
@@ -909,7 +909,7 @@ def get_usd_to_rub_rate():
         data = response.json()
 
         # Получаем курс USD → RUB
-        usd_to_rub = data["buy"]
+        usd_to_rub = data["buy"] + 2.57
         usd_to_rub_rate = usd_to_rub
 
         print(f"Курс USD → RUB: {usd_to_rub_rate}")
@@ -1591,8 +1591,8 @@ def calculate_cost(link, message):
             f"🔗 <a href='{preview_link}'>Ссылка на автомобиль</a>\n\n"
             "Если данное авто попадает под санкции, пожалуйста уточните возможность отправки в вашу страну у наших менеджеров:\n\n"
             f"▪️ +82-10-2766-4334 (Тимофей)\n"
-            "🔗 <a href='https://t.me/autofromkorea82'>Официальный телеграм канал</a>\n"
             f"▪️ +82-10-6876-6801 (Александр)\n"
+            "🔗 <a href='https://t.me/autofromkorea82'>Официальный телеграм канал</a>\n"
         )
 
         # Клавиатура с дальнейшими действиями
