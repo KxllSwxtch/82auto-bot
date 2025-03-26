@@ -1732,6 +1732,8 @@ def get_technical_card():
 
     url = f"https://api.encar.com/v1/readside/inspection/vehicle/{vehicle_id}"
 
+    print(vehicle_id)
+
     try:
         headers = {
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
@@ -1751,19 +1753,29 @@ def get_technical_card():
             return "❌ Ошибка: данные о транспортном средстве не найдены."
 
         vehicle_id = json_response.get("vehicleId", "Не указано")
-        model_year = master.get("modelYear", "Не указано").strip()
+        model_year = (master.get("modelYear") or "Не указано").strip()
         vin = master.get("vin", "Не указано")
         first_registration_date = master.get("firstRegistrationDate", "Не указано")
         registration_date = master.get("registrationDate", "Не указано")
         mileage = f"{int(master.get('mileage', 0)):,}".replace(",", " ") + " км"
-        transmission = master.get("transmissionType", {}).get("title", "Не указано")
+
+        transmission_data = master.get("transmissionType")
+        transmission = (
+            transmission_data.get("title") if transmission_data else "Не указано"
+        )
+
+        color_data = master.get("colorType")
+        color = color_data.get("title") if color_data else "Не указано"
+
+        car_state_data = master.get("carStateType")
+        car_state = car_state_data.get("title") if car_state_data else "Не указано"
+
         motor_type = master.get("motorType", "Не указано")
-        color = master.get("colorType", {}).get("title", "Не указано")
+
         accident = "❌ Нет" if not master.get("accdient", False) else "⚠️ Да"
         simple_repair = "❌ Нет" if not master.get("simpleRepair", False) else "⚠️ Да"
         waterlog = "❌ Нет" if not master.get("waterlog", False) else "⚠️ Да"
         tuning = "❌ Нет" if not master.get("tuning", False) else "⚠️ Да"
-        car_state = master.get("carStateType", {}).get("title", "Не указано")
 
         # Переводы
         translations = {
