@@ -945,7 +945,7 @@ def main_menu():
     keyboard.add(
         types.KeyboardButton(CALCULATE_CAR_TEXT),
         types.KeyboardButton("Ручной расчёт"),
-        types.KeyboardButton("Часто задаваемые вопросы"),
+        types.KeyboardButton("Вопросы/Ответы"),
     )
     keyboard.add(
         types.KeyboardButton("Написать менеджеру"),
