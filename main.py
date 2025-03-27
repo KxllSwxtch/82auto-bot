@@ -103,6 +103,25 @@ ORDER_STATUSES = {
     "6": "🚛 Доставляется клиенту",
 }
 
+faq_list = [
+    {
+        "question": "Сколько стоит доставка авто из Кореи?",
+        "answer": "Стоимость доставки зависит от города и типа автомобиля. В среднем — от $900 до $1500.",
+    },
+    {
+        "question": "Какие документы нужны для покупки?",
+        "answer": "Для оформления потребуется паспорт, ИНН и контактные данные получателя.",
+    },
+    {
+        "question": "Сколько длится доставка?",
+        "answer": "Средний срок доставки от момента покупки — 30-45 дней.",
+    },
+    {
+        "question": "Можно ли купить авто в рассрочку?",
+        "answer": "Да, мы работаем с банками и лизинговыми компаниями. Уточните у менеджера детали.",
+    },
+]
+
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("add_favorite_"))
 def add_favorite_car(call):
@@ -945,7 +964,7 @@ def main_menu():
     keyboard.add(
         types.KeyboardButton(CALCULATE_CAR_TEXT),
         types.KeyboardButton("Ручной расчёт"),
-        types.KeyboardButton("Вопросы/Ответы"),
+        types.KeyboardButton("Вопрос/Ответ"),
     )
     keyboard.add(
         types.KeyboardButton("Написать менеджеру"),
@@ -1858,6 +1877,47 @@ def get_technical_card():
         return f"❌ Ошибка при получении данных: {e}"
 
 
+# Вопрос/Ответ
+def show_faq(message):
+    keyboard = types.InlineKeyboardMarkup()
+
+    for idx, faq in enumerate(faq_list):
+        keyboard.add(
+            types.InlineKeyboardButton(faq["question"], callback_data=f"faq_{idx}")
+        )
+
+    keyboard.add(types.InlineKeyboardButton("Назад в меню", callback_data="main_menu"))
+
+    bot.send_message(message.chat.id, "📋 Выберите вопрос:", reply_markup=keyboard)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("faq_"))
+def answer_faq(call):
+    print(f"CALL DATA: {call.data}")  # проверка
+    try:
+        idx = int(call.data.split("_")[1])
+        question = faq_list[idx]["question"]
+        answer = faq_list[idx]["answer"]
+
+        keyboard = types.InlineKeyboardMarkup()
+        keyboard.add(
+            types.InlineKeyboardButton("🔙 Назад к вопросам", callback_data="show_faq")
+        )
+        keyboard.add(
+            types.InlineKeyboardButton("🏠 Главное меню", callback_data="main_menu")
+        )
+
+        bot.send_message(
+            call.message.chat.id,
+            f"❓ <b>{question}</b>\n\n💬 {answer}",
+            parse_mode="HTML",
+            reply_markup=keyboard,
+        )
+    except Exception as e:
+        print(f"Ошибка в answer_faq: {e}")
+        bot.answer_callback_query(call.id, "Произошла ошибка при обработке вопроса.")
+
+
 # Callback query handler
 @bot.callback_query_handler(func=lambda call: True)
 def handle_callback_query(call):
@@ -2064,6 +2124,9 @@ def handle_callback_query(call):
 
     elif call.data == "main_menu":
         bot.send_message(call.message.chat.id, "Главное меню", reply_markup=main_menu())
+
+    elif call.data == "show_faq":
+        show_faq(call.message)
 
 
 def process_car_age(message):
@@ -2390,20 +2453,19 @@ def handle_message(message):
         )
         bot.register_next_step_handler(message, process_car_age)
 
-    elif user_message == "Часто задаваемые вопросы":
-        bot.send_message(
-            message.chat.id,
-            "В разработке...",
-        )
+    elif user_message == "Вопрос/Ответ":
+        show_faq(message)
+
     elif re.match(
         r"^https?://(www|fem)\.encar\.com/.*|^https?://(www\.)?kbchachacha\.com/.*|^https?://m\.kbchachacha\.com/.*|^https?://(www\.)?kcar\.com/.*",
         user_message,
     ):
         calculate_cost(user_message, message)
+
     elif user_message == "Написать менеджеру":
         managers_list = [
-            {"name": "Александр", "whatsapp": "https://wa.me/821068766801"},
             {"name": "Тимофей ", "whatsapp": "https://wa.me/821027664334"},
+            {"name": "Александр", "whatsapp": "https://wa.me/821068766801"},
         ]
 
         # Формируем сообщение со списком менеджеров
@@ -2413,20 +2475,24 @@ def handle_message(message):
 
         # Отправляем сообщение с использованием Markdown
         bot.send_message(message.chat.id, message_text, parse_mode="Markdown")
+
     elif user_message == "О нас":
         about_message = "82 Auto\nЮжнокорейская экспортная компания.\nСпециализируемся на поставках автомобилей из Южной Кореи в страны СНГ.\nОпыт работы более 5 лет.\n\nПочему выбирают нас?\n• Надежность и скорость доставки.\n• Индивидуальный подход к каждому клиенту.\n• Полное сопровождение сделки.\n\n💬 Ваш путь к надежным автомобилям начинается здесь!"
         bot.send_message(message.chat.id, about_message)
+
     elif user_message == "Telegram-канал":
         channel_link = "https://t.me/autofromkorea82"
         bot.send_message(
             message.chat.id, f"Подписывайтесь на наш Telegram-канал: {channel_link}"
         )
+
     elif user_message == "Instagram":
         instagram_link = "https://www.instagram.com/82.auto"
         bot.send_message(
             message.chat.id,
             f"Посетите наш Instagram: {instagram_link}",
         )
+
     else:
         bot.send_message(
             message.chat.id,
