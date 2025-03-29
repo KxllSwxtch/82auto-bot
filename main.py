@@ -2562,11 +2562,11 @@ def process_car_price(message):
 
     # Клавиатура с дальнейшими действиями
     keyboard = types.InlineKeyboardMarkup()
-    keyboard.add(
-        types.InlineKeyboardButton(
-            "Рассчитать другой автомобиль", callback_data="calculate_another_manual"
-        )
-    )
+    # keyboard.add(
+    #     types.InlineKeyboardButton(
+    #         "Рассчитать другой автомобиль", callback_data="calculate_another_manual"
+    #     )
+    # )
     keyboard.add(
         types.InlineKeyboardButton(
             "Связаться с менеджером", url="https://t.me/Aleksandr_82auto"
