@@ -1158,8 +1158,12 @@ def get_car_info(url):
         car_make = response.get("category", {}).get(
             "manufacturerEnglishName", ""
         )  # Марка
-        car_model = response["category"]["modelGroupEnglishName"]  # Модель
-        car_trim = response["category"]["gradeDetailEnglishName"] or ""  # Комплектация
+        car_model = response.get("category", {}).get(
+            "modelGroupEnglishName", ""
+        )  # Модель
+        car_trim = response.get("category", {}).get(
+            "gradeDetailEnglishName", ""
+        )  # Комплектация
 
         car_title = f"{car_make} {car_model} {car_trim}"  # Заголовок
 
