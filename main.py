@@ -1184,7 +1184,7 @@ def get_car_info(url):
         formatted_transmission = "Автомат" if "오토" in transmission else "Механика"
 
         car_engine_displacement = str(response["spec"]["displacement"])
-        car_type = response["spec"]["bodyName"]
+        car_type = response("spec", {}).get("bodyName", "")
 
         # Список фотографий (берем первые 10)
         car_photos = [
