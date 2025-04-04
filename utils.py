@@ -84,7 +84,9 @@ def get_customs_fees_manual(engine_volume, car_price, car_age, engine_type=1):
         return None
 
 
-def get_customs_fees(engine_volume, car_price, car_year, car_month, engine_type=1):
+def get_customs_fees(
+    engine_volume, car_price, car_year, car_month, engine_type=1, owner_type=1
+):
     """
     Запрашивает расчёт таможенных платежей с сайта calcus.ru.
     :param engine_volume: Объём двигателя (куб. см)
@@ -96,7 +98,7 @@ def get_customs_fees(engine_volume, car_price, car_year, car_month, engine_type=
     url = "https://calcus.ru/calculate/Customs"
 
     payload = {
-        "owner": 1,  # Физлицо
+        "owner": owner_type,  # 1 - Физлицо, 2 - Юрлицо
         "age": calculate_age(car_year, car_month),  # Возрастная категория
         "engine": engine_type,  # Тип двигателя (по умолчанию 1 - бензин)
         "power": 1,  # Лошадиные силы (можно оставить 1)

@@ -59,6 +59,7 @@ rub_to_krw_rate = 0
 usd_rate = 0
 users = set()
 user_data = {}
+user_type_map = {}  # user_id: 1 (физ) или 2 (юр)
 
 car_month = None
 car_year = None
@@ -78,7 +79,9 @@ pending_orders = {}
 user_contacts = {}
 user_names = {}
 
-MANAGERS = [728438182, 642176871, 8039170978]
+MANAGERS = [
+    728438182,
+]
 # FREE_ACCESS_USERS = {
 #     1759578050,
 #     7914145866,
@@ -1358,7 +1361,7 @@ def get_car_info(url):
 
 
 # Function to calculate the total cost
-def calculate_cost(link, message):
+def calculate_cost(link, message, user_type):
     global car_data, car_id_external, car_month, car_year, krw_rub_rate, eur_rub_rate, rub_to_krw_rate, usd_rate, usdt_to_krw_rate
 
     get_currency_rates()
@@ -1570,6 +1573,7 @@ def calculate_cost(link, message):
             int(formatted_car_year),
             car_month,
             engine_type=1,
+            owner_type=user_type,
         )
 
         # Таможенный сбор
@@ -2142,7 +2146,6 @@ def handle_callback_query(call):
             f"<b>Доставку до вашего города уточняйте у менеджеров:</b>\n"
             f"▪️ +82-10-2766-4334 (Тимофей)\n"
             f"▪️ +82-10-6876-6801 (Александр)\n"
-            # f"▪️ +82 10-5128-8082 (Александр)\n\n"
         )
 
         # Inline buttons for further actions
@@ -2284,10 +2287,30 @@ def handle_callback_query(call):
                 reply_markup=keyboard,
             )
 
-    elif call.data == "calculate_another":
+    elif call.data == "user_type_physical":
+        user_type_map[call.message.chat.id] = 1
         bot.send_message(
             call.message.chat.id,
             "Пожалуйста, введите ссылку на автомобиль с сайта (encar.com, kbchachacha.com, web.chutcha.net)",
+        )
+
+    elif call.data == "user_type_legal":
+        user_type_map[call.message.chat.id] = 2
+        bot.send_message(
+            call.message.chat.id,
+            "Пожалуйста, введите ссылку на автомобиль с сайта (encar.com, kbchachacha.com, web.chutcha.net)",
+        )
+
+    elif call.data == "calculate_another":
+        markup_type_keyboard = types.InlineKeyboardMarkup(row_width=2)
+        markup_type_keyboard.add(
+            types.InlineKeyboardButton("Физ лицо", callback_data="user_type_physical"),
+            types.InlineKeyboardButton("Юр лицо", callback_data="user_type_legal"),
+        )
+        bot.send_message(
+            call.message.chat.id,
+            "Выберите тип расчёта",
+            reply_markup=markup_type_keyboard,
         )
 
     elif call.data == "calculate_another_manual":
@@ -2616,9 +2639,22 @@ def handle_message(message):
 
     # Проверяем нажатие кнопки "Рассчитать автомобиль"
     if user_message == CALCULATE_CAR_TEXT:
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+        markup.add(types.KeyboardButton("Физ. лицо"), types.KeyboardButton("Юр. лицо"))
+        bot.send_message(
+            message.chat.id,
+            "Выберите тип расчета:",
+            reply_markup=markup,
+        )
+
+    elif user_message in ["Физ. лицо", "Юр. лицо"]:
+        user_type = 1 if user_message == "Физ. лицо" else 2
+        user_type_map[message.from_user.id] = user_type
+
         bot.send_message(
             message.chat.id,
             "Пожалуйста, введите ссылку на автомобиль с одного из сайтов (encar.com, kbchachacha.com, kcar.com):",
+            reply_markup=types.ReplyKeyboardRemove(),  # Убираем клавиатуру
         )
 
     elif user_message == "Ручной расчёт":
@@ -2644,7 +2680,8 @@ def handle_message(message):
         r"^https?://(www|fem)\.encar\.com/.*|^https?://(www\.)?kbchachacha\.com/.*|^https?://m\.kbchachacha\.com/.*|^https?://(www\.)?kcar\.com/.*",
         user_message,
     ):
-        calculate_cost(user_message, message)
+        user_type = user_type_map.get(message.from_user.id, 1)  # по умолчанию физ лицо
+        calculate_cost(user_message, message, user_type)
 
     elif user_message == "Написать менеджеру":
         managers_list = [
