@@ -1609,16 +1609,16 @@ def calculate_cost(link, message, user_type):
         total_cost_krw = (
             price_krw  # Цена авто в вонах
             + 2000000  # Расходы по Корее
-            + customs_fee / rub_to_krw_rate  # Таможенный сбор
-            + customs_duty / rub_to_krw_rate  # Таможенная пошлина
-            + recycling_fee / rub_to_krw_rate  # Утильсбор
-            + 30000 / rub_to_krw_rate  # Брокер РФ
-            + 15000 / rub_to_krw_rate  # Временная регистрация
-            + 45000 / rub_to_krw_rate  # СВХ
-            + 25000 / rub_to_krw_rate  # Лаборатория
-            + 2000 / rub_to_krw_rate  # Коносамент
-            + 2000 / rub_to_krw_rate  # Экспертиза
-            + 8000 / rub_to_krw_rate  # Перегон из СВХ
+            + customs_fee * rub_to_krw_rate  # Таможенный сбор
+            + customs_duty * rub_to_krw_rate  # Таможенная пошлина
+            + recycling_fee * rub_to_krw_rate  # Утильсбор
+            + 30000 * rub_to_krw_rate  # Брокер РФ
+            + 15000 * rub_to_krw_rate  # Временная регистрация
+            + 45000 * rub_to_krw_rate  # СВХ
+            + 25000 * rub_to_krw_rate  # Лаборатория
+            + 2000 * rub_to_krw_rate  # Коносамент
+            + 2000 * rub_to_krw_rate  # Экспертиза
+            + 8000 * rub_to_krw_rate  # Перегон из СВХ
             + (
                 20000 / rub_to_krw_rate if car_engine_displacement > 2000 else 0
             )  # За санкционную добавляется «услуга консультанта"
@@ -1652,27 +1652,27 @@ def calculate_cost(link, message, user_type):
 
         # Стояночные
         car_data["parking_korea_krw"] = 440000
-        car_data["parking_korea_rub"] = 440000 / rub_to_krw_rate
+        car_data["parking_korea_rub"] = 440000 * rub_to_krw_rate
         # car_data["parking_korea_usd"] = 440000 / usd_to_krw_rate
 
         # Осмотр
         car_data["car_review_krw"] = 300000
-        car_data["car_review_rub"] = 300000 / rub_to_krw_rate
+        car_data["car_review_rub"] = 300000 * rub_to_krw_rate
         # car_data["car_review_usd"] = 300000 / usd_to_krw_rate
 
         # Документы
         car_data["korea_documents_krw"] = 150000
-        car_data["korea_documents_rub"] = 150000 / rub_to_krw_rate
+        car_data["korea_documents_rub"] = 150000 * rub_to_krw_rate
         # car_data["korea_documents_usd"] = 150000 / usd_to_krw_rate
 
         # Перевозка
         car_data["transfer_korea_krw"] = 230000
-        car_data["transfer_korea_rub"] = 230000 / rub_to_krw_rate
+        car_data["transfer_korea_rub"] = 230000 * rub_to_krw_rate
         # car_data["transfer_korea_usd"] = 230000 / usd_to_krw_rate
 
         # Фрахт
         car_data["freight_korea_krw"] = 880000
-        car_data["freight_korea_rub"] = 880000 / rub_to_krw_rate
+        car_data["freight_korea_rub"] = 880000 * rub_to_krw_rate
         # car_data["freight_korea_usd"] = 880000 / usd_to_krw_rate
 
         # Расходы по РФ
@@ -2146,7 +2146,7 @@ def handle_callback_query(call):
             f"Лаборатория:\n<b>₩{format_number(car_data['lab_krw'])}</b> | <b>{format_number(car_data['lab_rub'])} ₽</b>\n\n"
             f"Коносамент:\n<b>₩{format_number(car_data['konosament_krw'])}</b> | <b>{format_number(car_data['konosament_rub'])} ₽</b>\n\n"
             f"Экспертиза:\n<b>₩{format_number(car_data['expertise_krw'])}</b> | <b>{format_number(car_data['expertise_rub'])} ₽</b>\n\n"
-            f"Перегон из СВХ/Лаборатория/Стоянка:\n<b>₩{format_number(car_data['svh_transfer_krw'])}</b> | <b>{format_number(car_data['svh_transfer_krw'])} ₽</b>\n\n"
+            f"Перегон из СВХ/Лаборатория/Стоянка:\n<b>₩{format_number(car_data['svh_transfer_krw'])}</b> | <b>{format_number(car_data['svh_transfer_rub'])} ₽</b>\n\n"
             f"Услуги консультанта:\n<b>₩{format_number(car_data['consultant_fee_krw'])}</b> | <b>{format_number(car_data['consultant_fee_rub'])} ₽</b>\n\n"
             f"Итого под ключ: \n<b>₩{format_number(car_data['total_cost_krw'])}</b> | <b>{format_number(car_data['total_cost_rub'])} ₽</b>\n\n"
             f"<b>Доставку до вашего города уточняйте у менеджеров:</b>\n"
@@ -2731,8 +2731,16 @@ def handle_message(message):
         r"^https?://(www|fem)\.encar\.com/.*|^https?://(www\.)?kbchachacha\.com/.*|^https?://m\.kbchachacha\.com/.*|^https?://(www\.)?kcar\.com/.*",
         user_message,
     ):
-        user_type = user_type_map.get(message.from_user.id, 1)  # по умолчанию физ лицо
-        calculate_cost(user_message, message, user_type)
+        user_type = user_type_map.get(message.from_user.id)
+
+        if user_type is None:
+            bot.send_message(
+                message.chat.id,
+                "❗️Пожалуйста, выберите *Тип расчёта* перед отправкой ссылки.",
+                parse_mode="Markdown",
+            )
+        else:
+            calculate_cost(user_message, message, user_type)
 
     elif user_message == "Написать менеджеру":
         managers_list = [
