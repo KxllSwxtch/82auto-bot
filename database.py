@@ -62,6 +62,30 @@ def create_tables():
                 """
             )
 
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS users (
+                    id SERIAL PRIMARY KEY,
+                    telegram_id BIGINT UNIQUE,
+                    username TEXT,
+                    first_name TEXT,
+                    last_name TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+                """
+            )
+
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS logs (
+                    id SERIAL PRIMARY KEY,
+                    telegram_id BIGINT,
+                    action TEXT,
+                    data JSONB,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+                """
+            )
             conn.commit()
 
 
@@ -275,3 +299,24 @@ def delete_favorite_car(user_id, car_id):
                 (user_id, car_id),
             )
             conn.commit()
+
+
+def add_user_if_not_exists(user):
+    with connect_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO users (telegram_id, username, first_name, last_name)
+                VALUES (%s, %s, %s, %s)
+                ON CONFLICT (telegram_id) DO NOTHING;
+                """,
+                (user.id, user.username, user.first_name, user.last_name),
+            )
+            conn.commit()
+
+
+def get_all_users():
+    with connect_db() as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute("SELECT * FROM users ORDER BY created_at DESC;")
+            return cur.fetchall()

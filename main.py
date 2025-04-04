@@ -7,8 +7,15 @@ import locale
 import logging
 import urllib.parse
 
+from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 from apscheduler.schedulers.background import BackgroundScheduler
+from bs4 import BeautifulSoup
+from io import BytesIO
+from telebot import types
+from dotenv import load_dotenv
+from urllib.parse import urlparse, parse_qs
+
 from database import (
     create_tables,
     get_orders,
@@ -21,12 +28,9 @@ from database import (
     update_user_name,
     update_user_subscription,
     delete_favorite_car,
+    add_user_if_not_exists,
+    get_all_users,
 )
-from bs4 import BeautifulSoup
-from io import BytesIO
-from telebot import types
-from dotenv import load_dotenv
-from urllib.parse import urlparse, parse_qs
 from utils import (
     generate_encar_photo_url,
     clean_number,
@@ -35,6 +39,7 @@ from utils import (
     format_number,
     get_customs_fees_manual,
 )
+
 
 CALCULATE_CAR_TEXT = "Рассчитать Автомобиль (Encar, KBChaCha, KCar)"
 CHANNEL_USERNAME = "autofromkorea82"
@@ -79,9 +84,7 @@ pending_orders = {}
 user_contacts = {}
 user_names = {}
 
-MANAGERS = [
-    728438182,
-]
+MANAGERS = [728438182, 56022406]
 # FREE_ACCESS_USERS = {
 #     1759578050,
 #     7914145866,
@@ -942,6 +945,7 @@ def set_bot_commands():
         types.BotCommand("start", "Запустить бота"),
         types.BotCommand("exchange_rates", "Курсы валют"),
         types.BotCommand("my_cars", "Мои избранные автомобили"),
+        types.BotCommand("users", "Статистика (для менеджеров)"),
         # types.BotCommand("orders", "Список заказов (Для менеджеров)"),
     ]
 
@@ -1099,6 +1103,8 @@ def main_menu():
 # Start command handler
 @bot.message_handler(commands=["start"])
 def send_welcome(message):
+    add_user_if_not_exists(message.from_user)
+
     get_currency_rates()
 
     user_first_name = message.from_user.first_name
@@ -2633,12 +2639,57 @@ def process_car_price(message):
     del user_data[message.chat.id]
 
 
+@bot.message_handler(commands=["users"])
+def handle_users_command(message):
+    user_id = message.from_user.id
+    if user_id not in MANAGERS:
+        bot.reply_to(message, "❌ У вас нет доступа к этой команде.")
+        return
+
+    rows = get_all_users()  # получаем список всех пользователей
+
+    if not rows:
+        bot.reply_to(message, "❌ Пользователи не найдены.")
+        return
+
+    user_lines = []
+    for r in rows:
+        name = f"{r.get('first_name', '—')} {r.get('last_name') or ''}".strip()
+        telegram_id = r.get("telegram_id", "—")
+        created_at = r.get("created_at")
+        created_str = (
+            created_at.strftime("%d.%m.%Y %H:%M")
+            if isinstance(created_at, datetime)
+            else "—"
+        )
+        username = r.get("username", "")
+
+        user_lines.append(
+            f"👤 <b>{name}</b>\n"
+            f"🆔 <code>{telegram_id}</code>\n"
+            f"📅 {created_str}\n"
+            f"Никнейм: @{username}\n"
+        )
+
+    batch = ""
+    for line in user_lines:
+        if len(batch + line + "\n\n") > 4000:
+            bot.send_message(message.chat.id, batch.strip(), parse_mode="HTML")
+            batch = ""
+        batch += line + "----------------------------------------\n"
+
+    if batch:
+        bot.send_message(message.chat.id, batch.strip(), parse_mode="HTML")
+
+
 @bot.message_handler(func=lambda message: True)
 def handle_message(message):
     user_message = message.text.strip()
 
     # Проверяем нажатие кнопки "Рассчитать автомобиль"
     if user_message == CALCULATE_CAR_TEXT:
+        add_user_if_not_exists(message.from_user)
+        print(message.from_user)
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
         markup.add(types.KeyboardButton("Физ. лицо"), types.KeyboardButton("Юр. лицо"))
         bot.send_message(
