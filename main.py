@@ -2810,6 +2810,9 @@ if __name__ == "__main__":
     # create_tables()
     set_bot_commands()
 
+    # Удаляем webhook перед запуском polling
+    bot.delete_webhook()
+
     # Обновляем курс каждые 12 часов
     scheduler = BackgroundScheduler()
     scheduler.add_job(get_usdt_to_krw_rate, "interval", hours=12)
