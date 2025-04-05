@@ -15,7 +15,7 @@ USER_AGENTS = [
 
 
 def format_number(number):
-    return locale.format_string("%d", int(number), grouping=True)
+    return locale.format_string("%d", int(number), grouping=True).replace(",", ".")
 
 
 def calculate_age(year, month):
