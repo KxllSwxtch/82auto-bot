@@ -8,7 +8,6 @@ import logging
 import urllib.parse
 
 from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor
 from apscheduler.schedulers.background import BackgroundScheduler
 from bs4 import BeautifulSoup
 from io import BytesIO
@@ -1744,28 +1743,47 @@ def calculate_cost(link, message, user_type):
 
         # Формирование сообщения результата
         # <b>${format_number(total_cost_usd)}</b> |
+        # f"Стоимость автомобиля в Корее: ₩{format_number(price_krw)}\n"
+        # f"Стоимость автомобиля под ключ до Владивостока:\n<b>₩{format_number(total_cost_krw)}</b> | <b>{format_number(total_cost)} ₽</b>\n\n"
+
         result_message = (
-            f"{car_title}\n\n"
-            f"Возраст: {age_formatted} (дата регистрации: {month}/{year})\n"
-            f"Пробег: {formatted_mileage}\n"
-            f"Объём двигателя: {engine_volume_formatted}\n"
-            f"КПП: {formatted_transmission}\n\n"
-            f"Стоимость автомобиля в Корее: ₩{format_number(price_krw)}\n"
-            f"Стоимость автомобиля под ключ до Владивостока:\n<b>₩{format_number(total_cost_krw)}</b> | <b>{format_number(total_cost)} ₽</b>\n\n"
-            f"{car_insurance_payments_chutcha}"
+            f"🚗 {car_title}\n\n"
+            f"🗓 Возраст: {age_formatted} (дата регистрации: {month}/{year})\n"
+            f"🛣 Пробег: {formatted_mileage}\n"
+            f"🔧 Объём двигателя: {engine_volume_formatted}\n"
+            f"⚙️ КПП: {formatted_transmission}\n\n"
             f"💵 <b>Курс USDT к Воне: ₩{format_number(usdt_to_krw_rate)}</b>\n\n"
+            f"▪️ Стоимость автомобиля: <b>₩{format_number(car_data['car_price_krw'])} | {format_number(car_data['car_price_rub'])} ₽</b>\n"
+            f"▪️ Стояночные: <b>₩{format_number(car_data['parking_korea_krw'])} | {format_number(car_data['parking_korea_rub'])} ₽</b>\n"
+            f"▪️ Осмотр: <b>₩{format_number(car_data['car_review_krw'])} | {format_number(car_data['car_review_rub'])} ₽</b>\n"
+            f"▪️ Документы: <b>₩{format_number(car_data['korea_documents_krw'])} | {format_number(car_data['korea_documents_rub'])} ₽</b>\n"
+            f"▪️ Перевозка: <b>₩{format_number(car_data['transfer_korea_krw'])} | {format_number(car_data['transfer_korea_rub'])} ₽</b>\n"
+            f"▪️ Фрахт: <b>₩{format_number(car_data['freight_korea_krw'])} | {format_number(car_data['freight_korea_rub'])} ₽</b>\n\n"
+            f"▪️ Единая таможенная ставка: <b>₩{format_number(car_data['customs_duty_krw'])} | {format_number(car_data['customs_duty_rub'])} ₽</b>\n"
+            f"▪️ Таможенное оформление: <b>₩{format_number(car_data['customs_fee_krw'])} | {format_number(car_data['customs_fee_rub'])} ₽</b>\n"
+            f"▪️ Утилизационный сбор: <b>₩{format_number(car_data['util_fee_krw'])} | {format_number(car_data['util_fee_rub'])} ₽</b>\n\n"
+            f"▪️ Брокер: <b>₩{format_number(car_data['broker_krw'])} | {format_number(car_data['broker_rub'])} ₽</b>\n"
+            f"▪️ Временная регистрация: <b>₩{format_number(car_data['perm_registration_krw'])} | {format_number(car_data['perm_registration_rub'])} ₽</b>\n"
+            f"▪️ СВХ: <b>₩{format_number(car_data['svh_krw'])} | {format_number(car_data['svh_rub'])} ₽</b>\n"
+            f"▪️ Лаборатория: <b>₩{format_number(car_data['lab_krw'])} | {format_number(car_data['lab_rub'])} ₽</b>\n"
+            f"▪️ Коносамент: <b>₩{format_number(car_data['konosament_krw'])} | {format_number(car_data['konosament_rub'])} ₽</b>\n"
+            f"▪️ Экспертиза: <b>₩{format_number(car_data['expertise_krw'])} | {format_number(car_data['expertise_rub'])} ₽</b>\n"
+            f"▪️ Перегон из СВХ: <b>₩{format_number(car_data['svh_transfer_krw'])} | {format_number(car_data['svh_transfer_rub'])} ₽</b>\n"
+            f"▪️ Услуги консультанта: <b>₩{format_number(car_data['consultant_fee_krw'])} | {format_number(car_data['consultant_fee_rub'])} ₽</b>\n\n"
+            f"🟰 Итого под ключ до Владивостока: \n<b>₩{format_number(car_data['total_cost_krw'])} | {format_number(car_data['total_cost_rub'])} ₽</b>\n\n"
+            f"{car_insurance_payments_chutcha}"
             f"🔗 <a href='{preview_link}'>Ссылка на автомобиль</a>\n\n"
             "Если данное авто попадает под санкции, пожалуйста уточните возможность отправки в вашу страну у наших менеджеров:\n\n"
             f"▪️ +82-10-2766-4334 (Тимофей)\n"
-            f"▪️ +82-10-6876-6801 (Александр)\n"
+            f"▪️ +82-10-6876-6801 (Александр)\n\n"
             "🔗 <a href='https://t.me/autofromkorea82'>Официальный телеграм канал</a>\n"
         )
 
         # Клавиатура с дальнейшими действиями
         keyboard = types.InlineKeyboardMarkup()
-        keyboard.add(
-            types.InlineKeyboardButton("Детали расчёта", callback_data="detail")
-        )
+        # keyboard.add(
+        #     types.InlineKeyboardButton("Детали расчёта", callback_data="detail")
+        # )
 
         # Кнопка для добавления в избранное
         keyboard.add(
@@ -2605,7 +2623,7 @@ def process_car_price(message):
         f"Лаборатория:\n<b>₩{format_number(car_data['lab_krw'])}</b> | <b>{format_number(car_data['lab_rub'])} ₽</b>\n\n"
         f"Коносамент:\n<b>₩{format_number(car_data['konosament_krw'])}</b> | <b>{format_number(car_data['konosament_rub'])} ₽</b>\n\n"
         f"Экспертиза:\n<b>₩{format_number(car_data['expertise_krw'])}</b> | <b>{format_number(car_data['expertise_rub'])} ₽</b>\n\n"
-        f"Перегон из СВХ/Лаборатория/Стоянка:\n<b>₩{format_number(car_data['svh_transfer_krw'])}</b> | <b>{format_number(car_data['svh_transfer_krw'])} ₽</b>\n\n"
+        f"Перегон из СВХ/Лаборатория/Стоянка:\n<b>₩{format_number(car_data['svh_transfer_krw'])}</b> | <b>{format_number(car_data['svh_transfer_rub'])} ₽</b>\n\n"
         f"Услуги консультанта:\n<b>₩{format_number(car_data['consultant_fee_krw'])}</b> | <b>{format_number(car_data['consultant_fee_rub'])} ₽</b>\n\n"
         f"Итого под ключ: \n<b>₩{format_number(car_data['total_cost_krw'])}</b> | <b>{format_number(car_data['total_cost_rub'])} ₽</b>\n\n"
         f"<b>Доставку до вашего города уточняйте у менеджеров:</b>\n"
@@ -2734,10 +2752,17 @@ def handle_message(message):
         user_type = user_type_map.get(message.from_user.id)
 
         if user_type is None:
+            markup = types.ReplyKeyboardMarkup(
+                resize_keyboard=True, one_time_keyboard=True
+            )
+            markup.add(
+                types.KeyboardButton("Физ. лицо"), types.KeyboardButton("Юр. лицо")
+            )
             bot.send_message(
                 message.chat.id,
                 "❗️Пожалуйста, выберите *Тип расчёта* перед отправкой ссылки.",
                 parse_mode="Markdown",
+                reply_markup=markup,
             )
         else:
             calculate_cost(user_message, message, user_type)
