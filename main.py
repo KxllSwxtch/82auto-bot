@@ -1754,7 +1754,7 @@ def calculate_cost(link, message, user_type):
             f"⚙️ КПП: {formatted_transmission}\n\n"
             f"💵 <b>Курс USDT к Воне: ₩{format_number(usdt_to_krw_rate)}</b>\n\n"
             f"🇰🇷 Платежи в Корее\n"
-            f"▪️ Стоимость автомобиля: <b>{format_number(car_data['car_price_rub'])} ₽</b> | <b>₩{format_number(car_data['car_price_krw'])}</b>\n"
+            f"▪️ Стоимость автомобиля: <b>₩{format_number(car_data['car_price_krw'])}</b> | <b>{format_number(car_data['car_price_rub'])} ₽</b>\n"
             f"▪️ Расходы по Корее (Фрахт, Стояночные, Логистика, Осмотр, Экспортные документы): <b>₩{format_number(2000000)}</b> | <b>{format_number(2000000 * rub_to_krw_rate)} ₽</b>\n\n\n"
             f"🇷🇺 Платежи в России\n"
             f"▪️ <b>Единая таможенная ставка</b>: <b>{format_number(car_data['customs_duty_rub'])} ₽</b>\n"
