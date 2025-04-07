@@ -6,6 +6,7 @@ import requests
 import locale
 import logging
 import urllib.parse
+import time
 
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -337,8 +338,9 @@ def show_favorite_cars(message):
             # f"📌 *Статус:* {car_status}\n\n"
             f"[🔗 Ссылка на автомобиль]({car_link})\n\n"
             f"Консультация с менеджерами:\n\n"
-            f"▪️ +82-10-6876-6801 (Александр)\n"
             f"▪️ +82-10-2766-4334 (Тимофей)\n"
+            f"▪️ +82-10-6876-6801 (Александр) (Корея)\n"
+            f"▪️ +7-914-711-9099 (Александр) (Россия)\n"
         )
 
         # Создаём клавиатуру
@@ -1003,10 +1005,10 @@ def get_currency_rates():
     print_message("ПОЛУЧАЕМ КУРСЫ ВАЛЮТ")
 
     get_rub_to_krw_rate()
-    get_usd_to_krw_rate()
+    # get_usd_to_krw_rate()
 
     rates_text = (
-        f"USD → KRW: <b>{usd_to_krw_rate:.2f} ₩</b>\n"
+        # f"USD → KRW: <b>{usd_to_krw_rate:.2f} ₩</b>\n"
         f"RUB → KRW: <b>{rub_to_krw_rate:.5f} ₽</b>\n"
         # f"USD → RUB: <b>{usd_to_rub_rate:.2f} ₽</b>"
     )
@@ -1773,7 +1775,8 @@ def calculate_cost(link, message, user_type):
             f"🔗 <a href='{preview_link}'>Ссылка на автомобиль</a>\n\n"
             "Если данное авто попадает под санкции, пожалуйста уточните возможность отправки в вашу страну у наших менеджеров:\n\n"
             f"▪️ +82-10-2766-4334 (Тимофей)\n"
-            f"▪️ +82-10-6876-6801 (Александр)\n\n"
+            f"▪️ +82-10-6876-6801 (Александр) (Корея)\n\n"
+            f"▪️ +7-914-711-9099 (Александр) (Россия)\n\n"
             "🔗 <a href='https://t.me/autofromkorea82'>Официальный телеграм канал</a>\n"
         )
 
@@ -2167,7 +2170,8 @@ def handle_callback_query(call):
             f"Итого под ключ: \n<b>₩{format_number(car_data['total_cost_krw'])}</b> | <b>{format_number(car_data['total_cost_rub'])} ₽</b>\n\n"
             f"<b>Доставку до вашего города уточняйте у менеджеров:</b>\n"
             f"▪️ +82-10-2766-4334 (Тимофей)\n"
-            f"▪️ +82-10-6876-6801 (Александр)\n"
+            f"▪️ +82-10-6876-6801 (Александр) (Корея)\n"
+            f"▪️ +7-914-711-9099 (Александр) (Россия)\n\n"
         )
 
         # Inline buttons for further actions
@@ -2620,9 +2624,10 @@ def process_car_price(message):
         f"Перегон из СВХ/Лаборатория/Стоянка:\n<b>{format_number(car_data['svh_transfer_rub'])} ₽</b>\n\n"
         f"Услуги консультанта:\n<b>{format_number(car_data['consultant_fee_rub'])} ₽</b>\n\n"
         f"Итого под ключ: \n<b>{format_number(car_data['total_cost_rub'])} ₽</b>\n\n"
-        f"<b>Доставку до вашего города уточняйте у менеджеров:</b>\n"
+        f"<b>Доставку до вашего города уточняйте у менеджеров:</b> (Корея)\n"
         f"▪️ +82-10-2766-4334 (Тимофей)\n"
-        f"▪️ +82-10-6876-6801 (Александр)\n"
+        f"▪️ +82-10-6876-6801 (Александр) (Корея)\n"
+        f"▪️ +7-914-711-9099 (Александр) (Россия)\n\n"
     )
 
     # Клавиатура с дальнейшими действиями
@@ -2807,9 +2812,21 @@ if __name__ == "__main__":
     # Удаляем webhook перед запуском polling
     bot.delete_webhook()
 
+    # Настройка параметров бота
+    telebot.apihelper.RETRY_ON_ERROR = True
+    telebot.apihelper.CONNECT_TIMEOUT = 10
+    telebot.apihelper.READ_TIMEOUT = 30
+
     # Обновляем курс каждые 12 часов
     scheduler = BackgroundScheduler()
-    scheduler.add_job(get_usdt_to_krw_rate, "interval", hours=12)
+    scheduler.add_job(get_currency_rates, "interval", hours=12)
     scheduler.start()
 
-    bot.polling(non_stop=True)
+    while True:
+        try:
+            print("Бот запущен...")
+            bot.polling(non_stop=True, interval=1, timeout=20)
+        except Exception as e:
+            print(f"Ошибка в работе бота: {e}")
+            time.sleep(15)
+            continue
