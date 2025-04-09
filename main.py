@@ -2824,8 +2824,7 @@ def delete_webhook_properly():
 
         logger.info(f"Результат удаления webhook через API: {result}")
 
-        # Даже если API вернул ошибку, попробуем запустить бота
-        # Иногда API возвращает ошибку, но webhook фактически удален
+        # Даем время на обработку запроса
         time.sleep(3)
 
         return True  # Пытаемся запустить бота в любом случае
@@ -2857,11 +2856,9 @@ if __name__ == "__main__":
 
         # Добавляем настройки для обхода блокировок
         telebot.apihelper.RETRY_ON_ERROR = True
-        telebot.apihelper.ENABLE_MIDDLEWARE = True
-        telebot.apihelper.SESSION_TIME_TO_LIVE = 5 * 60  # 5 минут
-
-        # Настраиваем прокси для API запросов (если необходимо)
-        # telebot.apihelper.proxy = {'https': 'socks5://user:pass@host:port'}
+        # Убираем ENABLE_MIDDLEWARE, так как он не поддерживается
+        telebot.apihelper.READ_TIMEOUT = 30
+        telebot.apihelper.CONNECT_TIMEOUT = 10
 
         # Удаляем webhook один раз перед запуском цикла
         delete_webhook_properly()
@@ -2872,7 +2869,8 @@ if __name__ == "__main__":
                 logger.info("Запуск бота...")
 
                 # Запускаем бота с настройками
-                bot.polling(non_stop=True, timeout=60, long_polling_timeout=60)
+                # Используем только поддерживаемые параметры
+                bot.polling(non_stop=True, timeout=30)
 
             except Exception as e:
                 logger.error(f"Ошибка в работе бота: {e}")
