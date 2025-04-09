@@ -2811,9 +2811,14 @@ logger = logging.getLogger(__name__)
 def delete_webhook_properly():
     """Функция для надежного удаления webhook"""
     try:
-        # Пробуем удалить через API напрямую
-        url = f"https://api.telegram.org/bot{BOT_TOKEN}/deleteWebhook?drop_pending_updates=True"
-        response = requests.get(url, timeout=10)
+        # Сначала проверяем текущий webhook
+        webhook_info = bot.get_webhook_info()
+        if webhook_info.url:
+            logger.info(f"Обнаружен активный webhook: {webhook_info.url}")
+
+        # Удаляем через API напрямую
+        api_url = f"https://api.telegram.org/bot{BOT_TOKEN}/deleteWebhook?drop_pending_updates=True"
+        response = requests.get(api_url, timeout=10)
         result = response.json()
 
         if result.get("ok"):
@@ -2821,16 +2826,18 @@ def delete_webhook_properly():
         else:
             logger.error(f"Ошибка при удалении webhook через API: {result}")
 
-        # Дополнительно пробуем удалить через метод библиотеки
-        bot.remove_webhook()
-        logger.info("Webhook удален через метод библиотеки")
+        # Даем время на обработку запроса
+        time.sleep(0.5)
 
-        # Проверяем статус webhook
+        # Проверяем еще раз
         webhook_info = bot.get_webhook_info()
         if webhook_info.url:
-            logger.error(f"Webhook все еще активен: {webhook_info.url}")
+            logger.error(f"Webhook все еще активен после удаления: {webhook_info.url}")
             return False
+
+        logger.info("Webhook успешно удален")
         return True
+
     except Exception as e:
         logger.error(f"Ошибка при удалении webhook: {e}")
         return False
@@ -2838,27 +2845,45 @@ def delete_webhook_properly():
 
 # Run the bot
 if __name__ == "__main__":
-    # create_tables()
-    set_bot_commands()
+    try:
+        # create_tables()
+        set_bot_commands()
 
-    while True:
-        try:
-            print("Удаляем webhook...")
-            # Принудительно удаляем webhook перед запуском
-            bot.remove_webhook()
+        while True:
+            try:
+                logger.info("Запуск бота...")
 
-            print("Бот запущен...")
-            # Добавляем паузу после удаления webhook
-            time.sleep(1)
+                # Пытаемся удалить webhook несколько раз
+                webhook_deleted = False
+                for attempt in range(3):
+                    logger.info(f"Попытка удаления webhook #{attempt + 1}")
+                    if delete_webhook_properly():
+                        webhook_deleted = True
+                        break
+                    time.sleep(3)
 
-            # Обновляем курс каждые 12 часов
-            scheduler = BackgroundScheduler()
-            scheduler.add_job(get_usdt_to_krw_rate, "interval", hours=12)
-            scheduler.start()
+                if not webhook_deleted:
+                    logger.error("Не удалось удалить webhook после трех попыток")
+                    time.sleep(30)
+                    continue
 
-            # Запускаем бота с настройками
-            bot.polling(non_stop=True, interval=1, timeout=20)
-        except Exception as e:
-            print(f"Ошибка в работе бота: {e}")
-            time.sleep(15)
-            continue
+                # Обновляем курс каждые 12 часов
+                scheduler = BackgroundScheduler()
+                scheduler.add_job(get_usdt_to_krw_rate, "interval", hours=12)
+                scheduler.start()
+
+                # Запускаем бота с настройками
+                logger.info("Запуск polling...")
+                bot.polling(non_stop=True, interval=1, timeout=20)
+
+            except Exception as e:
+                logger.error(f"Ошибка в работе бота: {e}")
+                time.sleep(15)
+                continue
+
+    except KeyboardInterrupt:
+        logger.info("Бот остановлен вручную")
+    except Exception as e:
+        logger.error(f"Критическая ошибка: {e}")
+    finally:
+        scheduler.shutdown()
