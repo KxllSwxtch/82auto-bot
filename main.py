@@ -8,6 +8,7 @@ import logging
 import urllib.parse
 import time
 
+
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from bs4 import BeautifulSoup
@@ -2802,6 +2803,37 @@ def handle_message(message):
             message.chat.id,
             "Пожалуйста, введите ссылку на автомобиль с сайта (encar.com, kbchachacha.com, web.chutcha.net)",
         )
+
+
+logger = logging.getLogger(__name__)
+
+
+def delete_webhook_properly():
+    """Функция для надежного удаления webhook"""
+    try:
+        # Пробуем удалить через API напрямую
+        url = f"https://api.telegram.org/bot{BOT_TOKEN}/deleteWebhook?drop_pending_updates=True"
+        response = requests.get(url, timeout=10)
+        result = response.json()
+
+        if result.get("ok"):
+            logger.info("Webhook успешно удален через API")
+        else:
+            logger.error(f"Ошибка при удалении webhook через API: {result}")
+
+        # Дополнительно пробуем удалить через метод библиотеки
+        bot.remove_webhook()
+        logger.info("Webhook удален через метод библиотеки")
+
+        # Проверяем статус webhook
+        webhook_info = bot.get_webhook_info()
+        if webhook_info.url:
+            logger.error(f"Webhook все еще активен: {webhook_info.url}")
+            return False
+        return True
+    except Exception as e:
+        logger.error(f"Ошибка при удалении webhook: {e}")
+        return False
 
 
 # Run the bot
