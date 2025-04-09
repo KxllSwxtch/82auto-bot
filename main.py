@@ -2809,22 +2809,22 @@ if __name__ == "__main__":
     # create_tables()
     set_bot_commands()
 
-    # Удаляем webhook перед запуском polling
-    bot.delete_webhook()
-
-    # Настройка параметров бота
-    telebot.apihelper.RETRY_ON_ERROR = True
-    telebot.apihelper.CONNECT_TIMEOUT = 10
-    telebot.apihelper.READ_TIMEOUT = 30
-
-    # Обновляем курс каждые 12 часов
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(get_currency_rates, "interval", hours=12)
-    scheduler.start()
-
     while True:
         try:
+            print("Удаляем webhook...")
+            # Принудительно удаляем webhook перед запуском
+            bot.remove_webhook()
+
             print("Бот запущен...")
+            # Добавляем паузу после удаления webhook
+            time.sleep(1)
+
+            # Обновляем курс каждые 12 часов
+            scheduler = BackgroundScheduler()
+            scheduler.add_job(get_usdt_to_krw_rate, "interval", hours=12)
+            scheduler.start()
+
+            # Запускаем бота с настройками
             bot.polling(non_stop=True, interval=1, timeout=20)
         except Exception as e:
             print(f"Ошибка в работе бота: {e}")
