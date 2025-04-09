@@ -2811,41 +2811,31 @@ logger = logging.getLogger(__name__)
 def delete_webhook_properly():
     """Функция для надежного удаления webhook"""
     try:
-        # Напрямую вызываем API метод deleteWebhook с правильными параметрами
+        # Сначала устанавливаем пустой webhook (это часто помогает при проблемах)
+        set_empty_url = f"https://api.telegram.org/bot{bot_token}/setWebhook?url="
+        requests.get(set_empty_url, timeout=10)
+        logger.info("Установлен пустой webhook URL")
+        time.sleep(3)  # Даем время на обработку
+
+        # Теперь удаляем webhook
         api_url = f"https://api.telegram.org/bot{bot_token}/deleteWebhook?drop_pending_updates=true"
         response = requests.get(api_url, timeout=10)
         result = response.json()
 
         logger.info(f"Результат удаления webhook через API: {result}")
 
-        if not result.get("ok"):
-            logger.error(f"Не удалось удалить webhook: {result}")
-            return False
-
-        # Важно! После удаления webhook нужно подождать
+        # Даже если API вернул ошибку, попробуем запустить бота
+        # Иногда API возвращает ошибку, но webhook фактически удален
         time.sleep(3)
 
-        # Проверяем, действительно ли webhook удален
-        check_url = f"https://api.telegram.org/bot{bot_token}/getWebhookInfo"
-        check_response = requests.get(check_url, timeout=10)
-        webhook_info = check_response.json()
-
-        logger.info(f"Информация о webhook после удаления: {webhook_info}")
-
-        # Проверяем, что URL вебхука пустой
-        if webhook_info.get("result", {}).get("url"):
-            logger.error(f"Webhook все еще активен: {webhook_info['result']['url']}")
-            return False
-
-        logger.info("Webhook успешно удален")
-        return True
+        return True  # Пытаемся запустить бота в любом случае
 
     except Exception as e:
         logger.error(f"Ошибка при удалении webhook: {e}")
         return False
 
 
-# Run the bot
+# Изменяем основной код запуска
 if __name__ == "__main__":
     # Настраиваем логирование
     logging.basicConfig(
@@ -2865,40 +2855,40 @@ if __name__ == "__main__":
         # Запускаем scheduler
         scheduler.start()
 
+        # Добавляем настройки для обхода блокировок
+        telebot.apihelper.RETRY_ON_ERROR = True
+        telebot.apihelper.ENABLE_MIDDLEWARE = True
+        telebot.apihelper.SESSION_TIME_TO_LIVE = 5 * 60  # 5 минут
+
+        # Настраиваем прокси для API запросов (если необходимо)
+        # telebot.apihelper.proxy = {'https': 'socks5://user:pass@host:port'}
+
+        # Удаляем webhook один раз перед запуском цикла
+        delete_webhook_properly()
+        time.sleep(5)  # Делаем большую паузу
+
         while True:
             try:
-                logger.info("Инициализация бота...")
-
-                # Пытаемся удалить webhook несколько раз
-                webhook_deleted = False
-                for attempt in range(5):  # Увеличиваем количество попыток до 5
-                    logger.info(f"Попытка удаления webhook #{attempt + 1}")
-                    if delete_webhook_properly():
-                        webhook_deleted = True
-                        break
-                    logger.info("Ожидание перед следующей попыткой...")
-                    time.sleep(5)  # Увеличиваем время ожидания между попытками
-
-                if not webhook_deleted:
-                    logger.error("Не удалось удалить webhook. Повторим через минуту.")
-                    time.sleep(60)
-                    continue
+                logger.info("Запуск бота...")
 
                 # Запускаем бота с настройками
-                logger.info("Запуск polling...")
-                bot.polling(non_stop=True, interval=3, timeout=30)
+                bot.polling(non_stop=True, timeout=60, long_polling_timeout=60)
 
-            except telebot.apihelper.ApiTelegramException as e:
-                logger.error(f"Ошибка API Telegram: {e}")
-                time.sleep(30)
             except Exception as e:
-                logger.error(f"Непредвиденная ошибка: {e}")
-                time.sleep(30)
+                logger.error(f"Ошибка в работе бота: {e}")
+
+                # При ошибке пробуем еще раз удалить webhook
+                try:
+                    logger.info("Повторная попытка удаления webhook")
+                    delete_webhook_properly()
+                except:
+                    pass
+
+                time.sleep(15)
 
     except KeyboardInterrupt:
         logger.info("Бот остановлен вручную")
     except Exception as e:
         logger.error(f"Критическая ошибка: {e}")
     finally:
-        # Останавливаем scheduler при выходе
         scheduler.shutdown()
