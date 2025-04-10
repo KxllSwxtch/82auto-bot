@@ -2808,33 +2808,75 @@ def handle_message(message):
 logger = logging.getLogger(__name__)
 
 
-def delete_webhook_properly():
-    """Функция для надежного удаления webhook"""
+def force_delete_webhook():
+    """Принудительное удаление webhook"""
+    for _ in range(3):  # Пробуем 3 раза
+        try:
+            # Устанавливаем пустой webhook
+            set_empty_url = f"https://api.telegram.org/bot{bot_token}/setWebhook?url="
+            requests.get(set_empty_url, timeout=10)
+            time.sleep(2)
+
+            # Удаляем webhook
+            api_url = f"https://api.telegram.org/bot{bot_token}/deleteWebhook?drop_pending_updates=true"
+            requests.get(api_url, timeout=10)
+            time.sleep(2)
+
+            # Проверяем результат
+            check_url = f"https://api.telegram.org/bot{bot_token}/getWebhookInfo"
+            check_response = requests.get(check_url, timeout=10)
+            webhook_info = check_response.json()
+
+            # Если URL всё еще есть, продолжаем попытки
+            if not webhook_info.get("result", {}).get("url", ""):
+                logger.info("Webhook успешно удален")
+                return True
+
+            logger.warning(f"Webhook все еще активен: {webhook_info}")
+        except Exception as e:
+            logger.error(f"Ошибка при удалении webhook: {e}")
+
+        time.sleep(5)
+
+    return False
+
+
+def custom_get_updates(offset=None, limit=100, timeout=30):
+    """Ручное получение обновлений без использования встроенного polling"""
     try:
-        # Сначала устанавливаем пустой webhook (это часто помогает при проблемах)
-        set_empty_url = f"https://api.telegram.org/bot{bot_token}/setWebhook?url="
-        requests.get(set_empty_url, timeout=10)
-        logger.info("Установлен пустой webhook URL")
-        time.sleep(3)  # Даем время на обработку
-
-        # Теперь удаляем webhook
-        api_url = f"https://api.telegram.org/bot{bot_token}/deleteWebhook?drop_pending_updates=true"
-        response = requests.get(api_url, timeout=10)
-        result = response.json()
-
-        logger.info(f"Результат удаления webhook через API: {result}")
-
-        # Даем время на обработку запроса
-        time.sleep(3)
-
-        return True  # Пытаемся запустить бота в любом случае
-
+        url = f"https://api.telegram.org/bot{bot_token}/getUpdates?offset={offset}&limit={limit}&timeout={timeout}"
+        response = requests.get(url, timeout=timeout + 10)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("ok"):
+                return data.get("result", [])
     except Exception as e:
-        logger.error(f"Ошибка при удалении webhook: {e}")
-        return False
+        logger.error(f"Ошибка при получении обновлений: {e}")
+
+    return []
 
 
-# Изменяем основной код запуска
+def manual_polling():
+    """Ручной polling для обхода проблемы с webhook"""
+    offset = None
+
+    while True:
+        try:
+            updates = custom_get_updates(offset=offset)
+            if updates:
+                for update in updates:
+                    # Обрабатываем обновление вручную
+                    bot.process_new_updates([telebot.types.Update.de_json(update)])
+                    # Обновляем offset для получения следующих сообщений
+                    offset = update["update_id"] + 1
+
+            time.sleep(1)  # Небольшая задержка между запросами
+        except Exception as e:
+            logger.error(f"Ошибка в ручном polling: {e}")
+            time.sleep(5)
+
+
+# Основной код запуска
 if __name__ == "__main__":
     # Настраиваем логирование
     logging.basicConfig(
@@ -2854,35 +2896,13 @@ if __name__ == "__main__":
         # Запускаем scheduler
         scheduler.start()
 
-        # Добавляем настройки для обхода блокировок
-        telebot.apihelper.RETRY_ON_ERROR = True
-        # Убираем ENABLE_MIDDLEWARE, так как он не поддерживается
-        telebot.apihelper.READ_TIMEOUT = 30
-        telebot.apihelper.CONNECT_TIMEOUT = 10
+        # Принудительно удаляем webhook
+        if not force_delete_webhook():
+            logger.error("Не удалось удалить webhook, но пытаемся продолжить работу")
 
-        # Удаляем webhook один раз перед запуском цикла
-        delete_webhook_properly()
-        time.sleep(5)  # Делаем большую паузу
-
-        while True:
-            try:
-                logger.info("Запуск бота...")
-
-                # Запускаем бота с настройками
-                # Используем только поддерживаемые параметры
-                bot.polling(non_stop=True, timeout=30)
-
-            except Exception as e:
-                logger.error(f"Ошибка в работе бота: {e}")
-
-                # При ошибке пробуем еще раз удалить webhook
-                try:
-                    logger.info("Повторная попытка удаления webhook")
-                    delete_webhook_properly()
-                except:
-                    pass
-
-                time.sleep(15)
+        # Запускаем ручной polling вместо bot.polling()
+        logger.info("Запуск ручного polling...")
+        manual_polling()
 
     except KeyboardInterrupt:
         logger.info("Бот остановлен вручную")
