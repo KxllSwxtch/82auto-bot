@@ -2809,40 +2809,6 @@ def handle_message(message):
 logger = logging.getLogger(__name__)
 
 
-def force_delete_webhook():
-    """Принудительное удаление webhook"""
-    for _ in range(3):  # Пробуем 3 раза
-        try:
-            # Устанавливаем пустой webhook
-            set_empty_url = f"https://api.telegram.org/bot{bot_token}/setWebhook?url="
-            requests.get(set_empty_url, timeout=10)
-            time.sleep(2)
-
-            # Удаляем webhook
-            api_url = f"https://api.telegram.org/bot{bot_token}/deleteWebhook?drop_pending_updates=true"
-            requests.get(api_url, timeout=10)
-            time.sleep(2)
-
-            # Проверяем результат
-            check_url = f"https://api.telegram.org/bot{bot_token}/getWebhookInfo"
-            check_response = requests.get(check_url, timeout=10)
-            webhook_info = check_response.json()
-
-            # Если URL всё еще есть, продолжаем попытки
-            if not webhook_info.get("result", {}).get("url", ""):
-                logger.info("Webhook успешно удален")
-                return True
-
-            logger.warning(f"Webhook все еще активен: {webhook_info}")
-        except Exception as e:
-            logger.error(f"Ошибка при удалении webhook: {e}")
-
-        time.sleep(5)
-
-    return False
-
-
-# Основной код запуска
 if __name__ == "__main__":
     # Настраиваем логирование
     logging.basicConfig(
@@ -2862,13 +2828,9 @@ if __name__ == "__main__":
         # Запускаем scheduler
         scheduler.start()
 
-        # Принудительно удаляем webhook
-        if not force_delete_webhook():
-            logger.error("Не удалось удалить webhook, но пытаемся продолжить работу")
-
         # Запускаем бота
         logger.info("Запуск бота...")
-        bot.polling(non_stop=True)
+        bot.polling(none_stop=True)
 
     except KeyboardInterrupt:
         logger.info("Бот остановлен вручную")
