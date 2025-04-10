@@ -49,7 +49,11 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 load_dotenv()
 bot_token = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(bot_token)
-bot.set_webhook("")
+try:
+    bot.set_webhook(url="")
+    time.sleep(2)  # Даем время на применение изменений
+except Exception as e:
+    print(f"Ошибка при удалении webhook: {e}")
 
 
 # Set locale for number formatting
@@ -1110,9 +1114,6 @@ def send_welcome(message):
     add_user_if_not_exists(message.from_user)
 
     # Удаляем webhook перед стартом бота
-    requests.get(
-        "https://api.telegram.org/bot8095855535:AAHBZPVzX34ivZrGglYNeI9aAMlfWTXFvVc/setWebhook?url="
-    )
 
     get_currency_rates()
 
@@ -1378,10 +1379,6 @@ def get_car_info(url):
 # Function to calculate the total cost
 def calculate_cost(link, message, user_type):
     global car_data, car_id_external, car_month, car_year, krw_rub_rate, eur_rub_rate, rub_to_krw_rate, usd_rate, usdt_to_krw_rate
-
-    requests.get(
-        "https://api.telegram.org/bot8095855535:AAHBZPVzX34ivZrGglYNeI9aAMlfWTXFvVc/setWebhook?url="
-    )
 
     get_currency_rates()
     get_usdt_to_krw_rate()
@@ -2819,32 +2816,31 @@ def handle_message(message):
 logger = logging.getLogger(__name__)
 
 
+# Полное удаление webhook перед началом работы
 if __name__ == "__main__":
-    # Настраиваем логирование
-    logging.basicConfig(
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        level=logging.INFO,
-    )
-    logger = logging.getLogger(__name__)
+    # Настройка обхода блокировок
+    telebot.apihelper.RETRY_ON_ERROR = True
 
-    # create_tables()
-    set_bot_commands()
-
-    # Определите scheduler за пределами цикла
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(get_usdt_to_krw_rate, "interval", hours=12)
-
+    # Удаляем webhook всеми возможными способами
     try:
-        # Запускаем scheduler
-        scheduler.start()
+        # Метод 1: через API напрямую с IP
+        requests.get(
+            f"https://149.154.167.220/bot{bot_token}/deleteWebhook?drop_pending_updates=true",
+            timeout=10,
+        )
+        time.sleep(2)
 
-        # Запускаем бота
-        logger.info("Запуск бота...")
-        bot.polling(none_stop=True)
+        # Метод 2: через библиотеку
+        bot.remove_webhook()
+        time.sleep(2)
 
-    except KeyboardInterrupt:
-        logger.info("Бот остановлен вручную")
+        # Метод 3: устанавливаем пустой webhook
+        bot.set_webhook(url="")
+        time.sleep(2)
+
+        print("Webhook удален всеми методами")
     except Exception as e:
-        logger.error(f"Критическая ошибка: {e}")
-    finally:
-        scheduler.shutdown()
+        print(f"Ошибка при удалении webhook: {e}")
+
+    # Запускаем бота
+    bot.polling(none_stop=True, interval=1, timeout=30)
