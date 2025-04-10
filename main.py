@@ -2821,26 +2821,43 @@ if __name__ == "__main__":
     # Настройка обхода блокировок
     telebot.apihelper.RETRY_ON_ERROR = True
 
-    # Удаляем webhook всеми возможными способами
-    try:
-        # Метод 1: через API напрямую с IP
-        requests.get(
-            f"https://api.telegram.org/bot{bot_token}/deleteWebhook?drop_pending_updates=true",
-            timeout=10,
-        )
-        time.sleep(2)
+    def delete_webhook():
+        try:
+            # Метод 1: через API напрямую с IP
+            requests.get(
+                f"https://api.telegram.org/bot{bot_token}/deleteWebhook?drop_pending_updates=true",
+                timeout=10,
+            )
+            time.sleep(2)
 
-        # Метод 2: через библиотеку
-        bot.remove_webhook()
-        time.sleep(2)
+            # Метод 2: через библиотеку
+            bot.remove_webhook()
+            time.sleep(2)
 
-        # Метод 3: устанавливаем пустой webhook
-        bot.set_webhook(url="")
-        time.sleep(2)
+            # Метод 3: устанавливаем пустой webhook
+            bot.set_webhook(url="")
+            time.sleep(2)
 
-        print("Webhook удален всеми методами")
-    except Exception as e:
-        print(f"Ошибка при удалении webhook: {e}")
+            print("Webhook удален всеми методами")
+        except Exception as e:
+            print(f"Ошибка при удалении webhook: {e}")
+
+    # Первоначальное удаление webhook
+    delete_webhook()
+
+    # Запускаем периодическое удаление webhook каждые 10 минут
+    import threading
+
+    def webhook_deletion_scheduler():
+        while True:
+            time.sleep(600)  # 10 минут = 600 секунд
+            print("Выполняется плановое удаление webhook...")
+            delete_webhook()
+
+    # Запускаем планировщик в отдельном потоке
+    webhook_thread = threading.Thread(target=webhook_deletion_scheduler)
+    webhook_thread.daemon = True  # Поток завершится вместе с основной программой
+    webhook_thread.start()
 
     # Запускаем бота
     bot.polling(none_stop=True, interval=1, timeout=30)
