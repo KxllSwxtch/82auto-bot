@@ -2825,7 +2825,7 @@ if __name__ == "__main__":
     try:
         # Метод 1: через API напрямую с IP
         requests.get(
-            f"https://149.154.167.220/bot{bot_token}/deleteWebhook?drop_pending_updates=true",
+            f"https://api.telegram.org/bot{bot_token}/deleteWebhook?drop_pending_updates=true",
             timeout=10,
         )
         time.sleep(2)
