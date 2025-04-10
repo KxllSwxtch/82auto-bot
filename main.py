@@ -49,7 +49,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 load_dotenv()
 bot_token = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(bot_token)
-bot.set_webhook()
+
 
 # Set locale for number formatting
 locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
@@ -2842,41 +2842,6 @@ def force_delete_webhook():
     return False
 
 
-def custom_get_updates(offset=None, limit=100, timeout=30):
-    """Ручное получение обновлений без использования встроенного polling"""
-    try:
-        url = f"https://api.telegram.org/bot{bot_token}/getUpdates?offset={offset}&limit={limit}&timeout={timeout}"
-        response = requests.get(url, timeout=timeout + 10)
-        if response.status_code == 200:
-            data = response.json()
-            if data.get("ok"):
-                return data.get("result", [])
-    except Exception as e:
-        logger.error(f"Ошибка при получении обновлений: {e}")
-
-    return []
-
-
-def manual_polling():
-    """Ручной polling для обхода проблемы с webhook"""
-    offset = None
-
-    while True:
-        try:
-            updates = custom_get_updates(offset=offset)
-            if updates:
-                for update in updates:
-                    # Обрабатываем обновление вручную
-                    bot.process_new_updates([telebot.types.Update.de_json(update)])
-                    # Обновляем offset для получения следующих сообщений
-                    offset = update["update_id"] + 1
-
-            time.sleep(1)  # Небольшая задержка между запросами
-        except Exception as e:
-            logger.error(f"Ошибка в ручном polling: {e}")
-            time.sleep(5)
-
-
 # Основной код запуска
 if __name__ == "__main__":
     # Настраиваем логирование
@@ -2901,9 +2866,9 @@ if __name__ == "__main__":
         if not force_delete_webhook():
             logger.error("Не удалось удалить webhook, но пытаемся продолжить работу")
 
-        # Запускаем ручной polling вместо bot.polling()
-        logger.info("Запуск ручного polling...")
-        manual_polling()
+        # Запускаем бота
+        logger.info("Запуск бота...")
+        bot.polling(non_stop=True)
 
     except KeyboardInterrupt:
         logger.info("Бот остановлен вручную")
