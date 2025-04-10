@@ -2850,7 +2850,7 @@ if __name__ == "__main__":
 
     def webhook_deletion_scheduler():
         while True:
-            time.sleep(600)  # 10 минут = 600 секунд
+            time.sleep(100)  # 100 секунд
             print("Выполняется плановое удаление webhook...")
             delete_webhook()
 
