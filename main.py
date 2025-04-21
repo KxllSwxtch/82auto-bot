@@ -2820,6 +2820,7 @@ logger = logging.getLogger(__name__)
 if __name__ == "__main__":
     # Настройка обхода блокировок
     telebot.apihelper.RETRY_ON_ERROR = True
+    set_bot_commands()
 
     def delete_webhook():
         try:
