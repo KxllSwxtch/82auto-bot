@@ -1779,7 +1779,7 @@ def calculate_cost(link, message, user_type):
             f"▪️ Экспертиза: <b>{format_number(car_data['expertise_rub'])} ₽</b>\n"
             f"▪️ Перегон из СВХ: <b>{format_number(car_data['svh_transfer_rub'])} ₽</b>\n"
             f"▪️ Услуги консультанта: <b>{format_number(car_data['consultant_fee_rub'])} ₽</b>\n\n"
-            f"🟰 Итого под ключ до Владивостока: <b>{format_number(car_data['total_cost_rub'])} ₽</b>\n\n"
+            f"🟰 Под ключ до Владивостока: <b>{format_number(car_data['total_cost_rub'])} ₽</b>\n\n"
             f"{car_insurance_payments_chutcha}"
             f"🔗 <a href='{preview_link}'>Ссылка на автомобиль</a>\n\n"
             f"Заказать Авто ⬇️⬇️⬇️\n\n"
