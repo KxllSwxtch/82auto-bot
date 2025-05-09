@@ -1784,13 +1784,13 @@ def calculate_cost(link, message, user_type):
             f"🔗 <a href='{preview_link}'>Ссылка на автомобиль</a>\n\n"
             f"Заказать Авто ⬇️⬇️⬇️\n\n"
             f"<b>Тимофей +82 10 2766 4334</b>\n"
-            f"<a href='https://t.me/korea82auto'>📱 Telegram</a>     <a href='https://wa.me/821027664334'>📱 WhatsApp</a>\n"
+            f"<a href='https://t.me/korea82auto'>🔵 Telegram</a>     <a href='https://wa.me/821027664334'>🟢 WhatsApp</a>\n\n"
             f"◽️◽️◽️◽️◽️◽️◽️◽️◽️◽️◽️◽️\n\n"
-            f"<b>Александр +7 994 994 3747</b>\n"
-            f"<a href='https://t.me/Aleksandr_82auto'>📱 Telegram</a>     <a href='https://wa.me/79147119099'>📱 WhatsApp</a>\n"
+            f"<b>Александр +7 994 994 3747</b>\n\n"
+            f"<a href='https://t.me/Aleksandr_82auto'>🔵 Telegram</a>     <a href='https://wa.me/79147119099'>🟢 WhatsApp</a>\n"
             f"◽️◽️◽️◽️◽️◽️◽️◽️◽️◽️◽️◽️\n\n"
             f"<b>Сергей +82 10 2805 3323</b>\n"
-            f"<a href='https://t.me/papastorkim'>📱 Telegram</a>     <a href='https://wa.me/821028053323'>📱 WhatsApp</a>\n\n"
+            f"<a href='https://t.me/papastorkim'>🔵 Telegram</a>     <a href='https://wa.me/821028053323'>🟢 WhatsApp</a>\n\n\n"
             "🔗 <a href='https://t.me/autofromkorea82'>Официальный телеграм канал</a>\n"
         )
 
