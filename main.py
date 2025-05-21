@@ -1112,9 +1112,6 @@ def main_menu():
 @bot.message_handler(commands=["start"])
 def send_welcome(message):
     add_user_if_not_exists(message.from_user)
-
-    # Удаляем webhook перед стартом бота
-
     get_currency_rates()
 
     user_first_name = message.from_user.first_name
@@ -1125,13 +1122,11 @@ def send_welcome(message):
     )
 
     # Логотип компании
-    logo_url = "https://res.cloudinary.com/pomegranitedesign/image/upload/v1742368668/82%20Auto/photo_2025-03-19_16-15-33.jpg"
+    logo_path = "assets/logo.jpeg"
 
     # Отправляем логотип перед сообщением
-    bot.send_photo(
-        message.chat.id,
-        photo=logo_url,
-    )
+    with open(logo_path, "rb") as logo_file:
+        bot.send_photo(message.chat.id, photo=types.InputFile(logo_file))
 
     # Отправляем приветственное сообщение
     bot.send_message(message.chat.id, welcome_message, reply_markup=main_menu())
