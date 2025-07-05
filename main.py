@@ -2635,7 +2635,7 @@ def process_car_price(message):
         f"Экспертиза: <b>{format_number(car_data['expertise_rub'])} ₽</b>\n"
         f"Перегон из СВХ/Лаборатория/Стоянка: <b>{format_number(car_data['svh_transfer_rub'])} ₽</b>\n"
         f"Услуги консультанта: <b>{format_number(car_data['consultant_fee_rub'])} ₽</b>\n\n"
-        f"Итого под ключ: <b>{format_number(car_data['total_cost_rub'])} ₽</b>\n\n\n"
+        f"Итого под ключ: <b>{format_number(car_data['total_cost_rub'])} ₽</b>\n\n"
         f"<b>Доставку до вашего города уточняйте у менеджеров:</b> (Корея)\n"
         f"▪️ +82-10-2766-4334 (Тимофей)\n"
         f"▪️ +82-10-6876-6801 (Александр) (Корея)\n"
