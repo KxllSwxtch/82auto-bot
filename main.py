@@ -2622,11 +2622,11 @@ def process_car_price(message):
     # Формирование сообщения результата
     # <b>${format_number(total_cost_usd)}</b> |
     result_message = (
-        f"Стоимость автомобиля в ЮК: <b>{format_number(car_data['car_price_rub'])} ₽</b>\n"
+        f"Стоимость автомобиля в ЮК: <b>{format_number(car_data['car_price_rub'])} ₽</b>\n\n"
         f"Расходы по Корее (Фрахт, Стояночные, Логистика, Осмотр, Экспортные документы): <b>{format_number(2000000 * rub_to_krw_rate)} ₽</b>\n"
         f"Единая таможенная ставка: <b>{format_number(car_data['customs_duty_rub'])} ₽</b>\n"
         f"Таможенное оформление: <b>{format_number(car_data['customs_fee_rub'])} ₽</b>\n"
-        f"Утилизационный сбор: <b>{format_number(car_data['util_fee_rub'])} ₽</b>\n\n"
+        f"Утилизационный сбор: <b>{format_number(car_data['util_fee_rub'])} ₽</b>\n"
         f"Брокер: <b>{format_number(car_data['broker_rub'])} ₽</b>\n"
         f"Временная регистрация: <b>{format_number(car_data['perm_registration_rub'])} ₽</b>\n"
         f"СВХ (Склад временного хранения): <b>{format_number(car_data['svh_rub'])} ₽</b>\n"
@@ -2634,9 +2634,9 @@ def process_car_price(message):
         f"Коносамент: <b>{format_number(car_data['konosament_rub'])} ₽</b>\n"
         f"Экспертиза: <b>{format_number(car_data['expertise_rub'])} ₽</b>\n"
         f"Перегон из СВХ/Лаборатория/Стоянка: <b>{format_number(car_data['svh_transfer_rub'])} ₽</b>\n"
-        f"Услуги консультанта: <b>{format_number(car_data['consultant_fee_rub'])} ₽</b>\n"
-        f"Итого под ключ: <b>{format_number(car_data['total_cost_rub'])} ₽</b>\n"
-        f"<b>Доставку до вашего города уточняйте у менеджеров:</b> (Корея)\n\n"
+        f"Услуги консультанта: <b>{format_number(car_data['consultant_fee_rub'])} ₽</b>\n\n"
+        f"Итого под ключ: <b>{format_number(car_data['total_cost_rub'])} ₽</b>\n\n\n"
+        f"<b>Доставку до вашего города уточняйте у менеджеров:</b> (Корея)\n"
         f"▪️ +82-10-2766-4334 (Тимофей)\n"
         f"▪️ +82-10-6876-6801 (Александр) (Корея)\n"
         f"▪️ +7-914-711-9099 (Александр) (Россия)\n\n"
