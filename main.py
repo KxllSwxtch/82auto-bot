@@ -346,8 +346,6 @@ def show_favorite_cars(message):
             f"[🔗 Ссылка на автомобиль]({car_link})\n\n"
             f"Консультация с менеджерами:\n\n"
             f"▪️ +82-10-2766-4334 (Тимофей)\n"
-            f"▪️ +82-10-6876-6801 (Александр) (Корея)\n"
-            f"▪️ +7-914-711-9099 (Александр) (Россия)\n"
         )
 
         # Создаём клавиатуру
@@ -1752,6 +1750,18 @@ def calculate_cost(link, message, user_type):
         # f"Стоимость автомобиля в Корее: ₩{format_number(price_krw)}\n"
         # f"Стоимость автомобиля под ключ до Владивостока:\n<b>₩{format_number(total_cost_krw)}</b> | <b>{format_number(total_cost)} ₽</b>\n\n"
 
+        # Calculate total RF expenses
+        rf_expenses_rub = (
+            car_data['broker_rub'] +
+            car_data['perm_registration_rub'] +
+            car_data['svh_rub'] +
+            car_data['lab_rub'] +
+            car_data['konosament_rub'] +
+            car_data['expertise_rub'] +
+            car_data['svh_transfer_rub'] +
+            car_data['consultant_fee_rub']
+        )
+
         result_message = (
             f"🚗 {car_title}\n\n"
             f"🗓 Возраст: {age_formatted} (дата регистрации: {month}/{year})\n"
@@ -1765,15 +1775,8 @@ def calculate_cost(link, message, user_type):
             f"🇷🇺 Платежи в России\n"
             f"▪️ <b>Единая таможенная ставка</b>: <b>{format_number(car_data['customs_duty_rub'])} ₽</b>\n"
             f"▪️ <b>Таможенное оформление</b>: <b>{format_number(car_data['customs_fee_rub'])} ₽</b>\n"
-            f"▪️ <b>Утилизационный сбор</b>: <b>{format_number(car_data['util_fee_rub'])} ₽</b>\n\n"
-            f"▪️ Брокер: <b>{format_number(car_data['broker_rub'])} ₽</b>\n"
-            f"▪️ Временная регистрация: <b>{format_number(car_data['perm_registration_rub'])} ₽</b>\n"
-            f"▪️ СВХ: <b>{format_number(car_data['svh_rub'])} ₽</b>\n"
-            f"▪️ Лаборатория: <b>{format_number(car_data['lab_rub'])} ₽</b>\n"
-            f"▪️ Коносамент: <b>{format_number(car_data['konosament_rub'])} ₽</b>\n"
-            f"▪️ Экспертиза: <b>{format_number(car_data['expertise_rub'])} ₽</b>\n"
-            f"▪️ Перегон из СВХ: <b>{format_number(car_data['svh_transfer_rub'])} ₽</b>\n"
-            f"▪️ Услуги консультанта: <b>{format_number(car_data['consultant_fee_rub'])} ₽</b>\n\n"
+            f"▪️ <b>Утилизационный сбор</b>: <b>{format_number(car_data['util_fee_rub'])} ₽</b>\n"
+            f"▪️ <b>Расходы в РФ</b>: <b>{format_number(rf_expenses_rub)} ₽</b>\n\n"
             f"🟰 Под ключ до Владивостока: <b>{format_number(car_data['total_cost_rub'])} ₽</b>\n\n"
             f"{car_insurance_payments_chutcha}"
             f"🔗 <a href='{preview_link}'>Ссылка на автомобиль</a>\n\n"
@@ -1781,14 +1784,6 @@ def calculate_cost(link, message, user_type):
             f"👤 Тимофей\n"
             f"📞 +82 10 2766 4334\n"
             f"<a href='https://t.me/korea82auto'>🔵 Telegram</a>  <a href='https://wa.me/821027664334'>🟢 WhatsApp</a>\n\n"
-            f"▫️▫️▫️▫️▫️▫️▫️▫️▫️▫️▫️▫️\n\n"
-            f"👤 Александр\n"
-            f"📞 +7 994 994 3747\n"
-            f"<a href='https://t.me/Aleksandr_82auto'>🔵 Telegram</a>  <a href='https://wa.me/79147119099'>🟢 WhatsApp</a>\n\n"
-            f"▫️▫️▫️▫️▫️▫️▫️▫️▫️▫️▫️▫️\n\n"
-            f"👤 Сергей\n"
-            f"📞 +82 10 2805 3323\n"
-            f"<a href='https://t.me/papastorkim'>🔵 Telegram</a>  <a href='https://wa.me/821028053323'>🟢 WhatsApp</a>\n\n\n"
             "🔗 <a href='https://t.me/autofromkorea82'>Официальный телеграм канал</a>\n"
         )
 
@@ -2161,6 +2156,28 @@ def handle_callback_query(call):
         # <b>${format_number(car_data['consultant_fee_usd'])}</b> |
         # <b>${format_number(car_data['total_cost_usd'])}</b> |
 
+        # Calculate total RF expenses for detail message
+        rf_expenses_krw = (
+            car_data['broker_krw'] +
+            car_data['perm_registration_krw'] +
+            car_data['svh_krw'] +
+            car_data['lab_krw'] +
+            car_data['konosament_krw'] +
+            car_data['expertise_krw'] +
+            car_data['svh_transfer_krw'] +
+            car_data['consultant_fee_krw']
+        )
+        rf_expenses_rub = (
+            car_data['broker_rub'] +
+            car_data['perm_registration_rub'] +
+            car_data['svh_rub'] +
+            car_data['lab_rub'] +
+            car_data['konosament_rub'] +
+            car_data['expertise_rub'] +
+            car_data['svh_transfer_rub'] +
+            car_data['consultant_fee_rub']
+        )
+
         detail_message = (
             f"Стоимость автомобиля:\n<b>₩{format_number(car_data['car_price_krw'])}</b> | <b>{format_number(car_data['car_price_rub'])} ₽</b>\n\n"
             f"Стояночные:\n<b>₩{format_number(car_data['parking_korea_krw'])}</b> | <b>{format_number(car_data['parking_korea_rub'])} ₽</b>\n\n"
@@ -2170,20 +2187,11 @@ def handle_callback_query(call):
             f"Фрахт:\n<b>₩{format_number(car_data['freight_korea_krw'])}</b> | <b>{format_number(car_data['freight_korea_rub'])} ₽</b>\n\n\n"
             f"Единая таможенная ставка:\n<b>₩{format_number(car_data['customs_duty_krw'])}</b> | <b>{format_number(car_data['customs_duty_rub'])} ₽</b>\n\n"
             f"Таможенное оформление:\n<b>₩{format_number(car_data['customs_fee_krw'])}</b> | <b>{format_number(car_data['customs_fee_rub'])} ₽</b>\n\n"
-            f"Утилизационный сбор:\n<b>₩{format_number(car_data['util_fee_krw'])}</b> | <b>{format_number(car_data['util_fee_rub'])} ₽</b>\n\n\n"
-            f"Брокер:\n<b>₩{format_number(car_data['broker_krw'])}</b> | <b>{format_number(car_data['broker_rub'])} ₽</b>\n\n"
-            f"Временная регистрация:\n<b>₩{format_number(car_data['perm_registration_krw'])}</b> | <b>{format_number(car_data['perm_registration_rub'])} ₽</b>\n\n"
-            f"СВХ (Склад временного хранения):\n<b>₩{format_number(car_data['svh_krw'])}</b> | <b>{format_number(car_data['svh_rub'])} ₽</b>\n\n"
-            f"Лаборатория:\n<b>₩{format_number(car_data['lab_krw'])}</b> | <b>{format_number(car_data['lab_rub'])} ₽</b>\n\n"
-            f"Коносамент:\n<b>₩{format_number(car_data['konosament_krw'])}</b> | <b>{format_number(car_data['konosament_rub'])} ₽</b>\n\n"
-            f"Экспертиза:\n<b>₩{format_number(car_data['expertise_krw'])}</b> | <b>{format_number(car_data['expertise_rub'])} ₽</b>\n\n"
-            f"Перегон из СВХ/Лаборатория/Стоянка:\n<b>₩{format_number(car_data['svh_transfer_krw'])}</b> | <b>{format_number(car_data['svh_transfer_rub'])} ₽</b>\n\n"
-            f"Услуги консультанта:\n<b>₩{format_number(car_data['consultant_fee_krw'])}</b> | <b>{format_number(car_data['consultant_fee_rub'])} ₽</b>\n\n"
+            f"Утилизационный сбор:\n<b>₩{format_number(car_data['util_fee_krw'])}</b> | <b>{format_number(car_data['util_fee_rub'])} ₽</b>\n\n"
+            f"Расходы в РФ (Брокер, Регистрация, СВХ, Лаборатория, Коносамент, Экспертиза, Перегон, Консультант):\n<b>₩{format_number(rf_expenses_krw)}</b> | <b>{format_number(rf_expenses_rub)} ₽</b>\n\n\n"
             f"Итого под ключ: \n<b>₩{format_number(car_data['total_cost_krw'])}</b> | <b>{format_number(car_data['total_cost_rub'])} ₽</b>\n\n"
             f"<b>Доставку до вашего города уточняйте у менеджеров:</b>\n"
             f"▪️ +82-10-2766-4334 (Тимофей)\n"
-            f"▪️ +82-10-6876-6801 (Александр) (Корея)\n"
-            f"▪️ +7-914-711-9099 (Александр) (Россия)\n\n"
         )
 
         # Inline buttons for further actions
@@ -2621,25 +2629,29 @@ def process_car_price(message):
 
     # Формирование сообщения результата
     # <b>${format_number(total_cost_usd)}</b> |
+
+    # Calculate total RF expenses
+    rf_expenses_rub = (
+        car_data['broker_rub'] +
+        car_data['perm_registration_rub'] +
+        car_data['svh_rub'] +
+        car_data['lab_rub'] +
+        car_data['konosament_rub'] +
+        car_data['expertise_rub'] +
+        car_data['svh_transfer_rub'] +
+        car_data['consultant_fee_rub']
+    )
+
     result_message = (
         f"Стоимость автомобиля в ЮК: <b>{format_number(car_data['car_price_rub'])} ₽</b>\n\n"
         f"Расходы по Корее (Фрахт, Стояночные, Логистика, Осмотр, Экспортные документы): <b>{format_number(2000000 * rub_to_krw_rate)} ₽</b>\n"
         f"Единая таможенная ставка: <b>{format_number(car_data['customs_duty_rub'])} ₽</b>\n"
         f"Таможенное оформление: <b>{format_number(car_data['customs_fee_rub'])} ₽</b>\n"
         f"Утилизационный сбор: <b>{format_number(car_data['util_fee_rub'])} ₽</b>\n"
-        f"Брокер: <b>{format_number(car_data['broker_rub'])} ₽</b>\n"
-        f"Временная регистрация: <b>{format_number(car_data['perm_registration_rub'])} ₽</b>\n"
-        f"СВХ (Склад временного хранения): <b>{format_number(car_data['svh_rub'])} ₽</b>\n"
-        f"Лаборатория: <b>{format_number(car_data['lab_rub'])} ₽</b>\n"
-        f"Коносамент: <b>{format_number(car_data['konosament_rub'])} ₽</b>\n"
-        f"Экспертиза: <b>{format_number(car_data['expertise_rub'])} ₽</b>\n"
-        f"Перегон из СВХ/Лаборатория/Стоянка: <b>{format_number(car_data['svh_transfer_rub'])} ₽</b>\n"
-        f"Услуги консультанта: <b>{format_number(car_data['consultant_fee_rub'])} ₽</b>\n\n"
+        f"Расходы в РФ: <b>{format_number(rf_expenses_rub)} ₽</b>\n\n"
         f"Итого под ключ: <b>{format_number(car_data['total_cost_rub'])} ₽</b>\n\n"
         f"<b>Доставку до вашего города уточняйте у менеджеров:</b> (Корея)\n"
         f"▪️ +82-10-2766-4334 (Тимофей)\n"
-        f"▪️ +82-10-6876-6801 (Александр) (Корея)\n"
-        f"▪️ +7-914-711-9099 (Александр) (Россия)\n\n"
     )
 
     # Клавиатура с дальнейшими действиями
@@ -2781,7 +2793,6 @@ def handle_message(message):
     elif user_message == "Написать менеджеру":
         managers_list = [
             {"name": "Тимофей ", "whatsapp": "https://wa.me/821027664334"},
-            {"name": "Александр", "whatsapp": "https://wa.me/821068766801"},
         ]
 
         # Формируем сообщение со списком менеджеров
